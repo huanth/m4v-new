@@ -86,13 +86,8 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        // Redirect based on user role
-        if ($user->isSuperAdmin()) {
-            return redirect()->route('dashboard');
-        }
-        
-        // All other users go to profile page
-        return redirect()->route('profile');
+        // Redirect all users to home page after registration
+        return redirect()->route('welcome');
     }
 
     /**

@@ -15,6 +15,6 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $currentUser = auth()->user();
         
-        return view('users.show', compact('user', 'currentUser'));
+        return view('user.show', compact('user', 'currentUser'));
     }
 }

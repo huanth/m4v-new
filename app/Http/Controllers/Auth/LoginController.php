@@ -18,7 +18,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/dashboard';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -150,13 +150,8 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
-        // Redirect based on user role
-        if ($user->isSuperAdmin()) {
-            return redirect()->route('dashboard');
-        }
-        
-        // All other users (Admin, SMod, FMod, user) go to profile page
-        return redirect()->route('profile');
+        // Redirect all users to home page after login
+        return redirect()->route('welcome');
     }
 
     /**
@@ -190,7 +185,7 @@ class LoginController extends Controller
 
         return $request->wantsJson()
             ? new JsonResponse([], 204)
-            : redirect('/');
+            : redirect()->route('login');
     }
 
     /**
@@ -201,10 +196,10 @@ class LoginController extends Controller
     public function redirectPath()
     {
         if (method_exists($this, 'redirectTo')) {
-            return $this->redirectTo ?? '/dashboard';
+            return $this->redirectTo ?? '/';
         }
 
-        return property_exists($this, 'redirectTo') ? $this->redirectTo : '/dashboard';
+        return property_exists($this, 'redirectTo') ? $this->redirectTo : '/';
     }
 
     /**

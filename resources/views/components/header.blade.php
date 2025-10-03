@@ -18,7 +18,9 @@
             <nav class="flex items-center space-x-4 flex-wrap">
                 <a href="{{ url('/') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('/') ? '!text-[#f55721]' : '' }}">TRANG CHỦ</a>
                 <a href="#" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap">BÀI VIẾT MỚI</a>
-                <a href="{{ route('guilds.index') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('guilds*') ? '!text-[#f55721]' : '' }}">BANG HỘI</a>
+                @auth
+                    <a href="{{ route('guilds.index') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('guilds*') ? '!text-[#f55721]' : '' }}">BANG HỘI</a>
+                @endauth
                 @auth
                     @php
                         $user = auth()->user();
@@ -53,9 +55,6 @@
                     <a href="{{ route('profile') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('profile') ? '!text-[#f55721]' : '' }}">TRANG CÁ NHÂN</a>
                     @if(auth()->user()->isSuperAdmin())
                         <a href="{{ route('dashboard') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('dashboard') ? '!text-[#f55721]' : '' }}">DASHBOARD</a>
-                    @endif
-                    @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.users.index') }}" class="text-white hover:text-gray-200 transition-colors whitespace-nowrap {{ request()->is('admin/*') ? '!text-[#f55721]' : '' }}">QUẢN TRỊ</a>
                     @endif
                     <a href="{{ route('logout') }}" 
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

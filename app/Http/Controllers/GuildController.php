@@ -18,7 +18,15 @@ class GuildController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        // Apply auth middleware only to methods that require authentication
+        $this->middleware('auth')->only([
+            'create', 'store', 'manage', 'join', 'leave', 'updateMemberRole',
+            'createCategory', 'updateCategory', 'deleteCategory',
+            'updateBanner', 'updateAnnouncement',
+            'createPost', 'storePost', 'editPost', 'updatePost', 'deletePost',
+            'togglePinPost', 'toggleLockPost', 'toggleLikePost',
+            'addComment', 'editComment', 'deleteComment', 'toggleLikeComment'
+        ]);
     }
 
     /**
