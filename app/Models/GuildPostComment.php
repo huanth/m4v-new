@@ -12,6 +12,8 @@ class GuildPostComment extends Model
     protected $fillable = [
         'post_id',
         'user_id',
+        'parent_id',
+        'quoted_content',
         'content',
     ];
 
@@ -95,5 +97,44 @@ class GuildPostComment extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Get the parent comment (if this is a reply)
+     */
+    public function parent()
+    {
+        return $this->belongsTo(GuildPostComment::class, 'parent_id');
+    }
+
+    /**
+     * Get all replies to this comment
+     */
+    public function replies()
+    {
+        return $this->hasMany(GuildPostComment::class, 'parent_id')->orderBy('created_at', 'asc');
+    }
+
+    /**
+     * Check if this comment is a reply
+     */
+    public function isReply()
+    {
+        return !is_null($this->parent_id);
+    }
+
+    /**
+     * Get the nesting level of this comment
+     */
+    public function getLevel()
+    {
+        $level = 0;
+        $current = $this;
+        while ($current->parent_id) {
+            $level++;
+            $current = $current->parent;
+            if ($level > 10) break; // Prevent infinite loops
+        }
+        return $level;
     }
 }

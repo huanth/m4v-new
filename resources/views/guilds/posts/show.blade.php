@@ -217,65 +217,166 @@
                     @if($post->comments->count() > 0)
                         <div class="space-y-4">
                             @foreach($post->comments as $comment)
-                            <div class="flex space-x-3">
-                                <div class="flex-shrink-0">
-                                    @if($comment->user->avatar)
-                                        <img src="{{ Storage::url($comment->user->avatar) }}" alt="Avatar" class="h-8 w-8 rounded-full object-cover">
-                                    @else
-                                        <div class="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                                            <span class="text-xs font-bold text-white">
-                                                {{ strtoupper(substr($comment->user->username, 0, 1)) }}
-                                            </span>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="bg-gray-50 rounded-lg p-3">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <div class="flex items-center space-x-2">
-                                                <p class="text-sm font-medium text-gray-900">{{ $comment->user->username }}</p>
-                                                <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                                <div class="flex space-x-3">
+                                    <!-- Avatar -->
+                                    <div class="flex-shrink-0">
+                                        @if($comment->user->avatar)
+                                            <img src="{{ Storage::url($comment->user->avatar) }}" alt="Avatar" class="h-10 w-10 rounded-full object-cover">
+                                        @else
+                                            <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                                                <span class="text-sm font-bold text-white">
+                                                    {{ strtoupper(substr($comment->user->username, 0, 1)) }}
+                                                </span>
                                             </div>
-                                            <div class="flex items-center space-x-2">
-                                                <!-- Like Comment Button -->
-                                                <form method="POST" action="{{ route('guilds.posts.comments.like', [$guild->id, $post->id, $comment->id]) }}" class="inline">
-                                                    @csrf
-                                                    <button type="submit" 
-                                                            class="flex items-center space-x-1 text-xs text-gray-500 hover:text-red-600 transition-colors">
-                                                        <svg class="w-4 h-4 {{ $comment->isLikedBy(auth()->id()) ? 'fill-current text-red-600' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                                        </svg>
-                                                        <span>{{ $comment->likes_count }}</span>
-                                                    </button>
-                                                </form>
+                                        @endif
+                                    </div>
 
-                                                <!-- Comment Actions -->
-                                                @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
-                                                <div class="flex items-center space-x-1">
-                                                    @if($comment->canEdit(auth()->id()))
-                                                        <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
-                                                                class="text-xs text-blue-600 hover:text-blue-800">
-                                                            Sửa
-                                                        </button>
+                                    <!-- Comment Content -->
+                                    <div class="flex-1 min-w-0">
+                                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                                            <!-- Comment Header -->
+                                            <div class="flex items-center justify-between mb-3">
+                                                <div class="flex items-center space-x-3">
+                                                    <p class="text-sm font-semibold text-gray-900">{{ $comment->user->username }}</p>
+                                                    <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                                                    @if($comment->created_at != $comment->updated_at)
+                                                        <span class="text-xs text-gray-400">(đã chỉnh sửa)</span>
                                                     @endif
-                                                    @if($comment->canDelete(auth()->id()))
-                                                        <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
-                                                              onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-xs text-red-600 hover:text-red-800">
-                                                                Xóa
-                                                            </button>
-                                                        </form>
+                                                    @if($comment->parent_id)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                            </svg>
+                                                            Trả lời {{ $comment->parent->user->username }}
+                                                        </span>
                                                     @endif
                                                 </div>
+                                                
+                                                <!-- Comment Actions -->
+                                                <div class="flex items-center space-x-2">
+                                                    <!-- Like Comment Button -->
+                                                    <form method="POST" action="{{ route('guilds.posts.comments.like', [$guild->id, $post->id, $comment->id]) }}" class="inline">
+                                                        @csrf
+                                                        <button type="submit" 
+                                                                class="flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-medium transition-colors {{ $comment->isLikedBy(auth()->id()) ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-gray-500 hover:text-red-600 hover:bg-gray-100' }}">
+                                                            <svg class="w-4 h-4 {{ $comment->isLikedBy(auth()->id()) ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                                            </svg>
+                                                            <span>{{ $comment->likes_count }}</span>
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- Reply Button -->
+                                                    @if($userMembership)
+                                                        <button onclick="toggleReplyForm({{ $comment->id }})" 
+                                                                class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
+                                                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                                            </svg>
+                                                            Trả lời
+                                                        </button>
+                                                    @endif
+
+                                                    <!-- Edit/Delete Actions -->
+                                                    @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
+                                                    <div class="flex items-center space-x-1">
+                                                        @if($comment->canEdit(auth()->id()))
+                                                            <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
+                                                                    class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
+                                                                Sửa
+                                                            </button>
+                                                        @endif
+                                                        @if($comment->canDelete(auth()->id()))
+                                                            <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
+                                                                  onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="px-2 py-1 rounded-md text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors">
+                                                                    Xóa
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <!-- Comment Content -->
+                                            <div class="mb-3">
+                                                @if($comment->quoted_content)
+                                                    <div class="bg-gray-50 border-l-4 border-blue-400 pl-3 py-2 mb-3 rounded-r-md">
+                                                        <p class="text-xs text-gray-600 mb-1">
+                                                            <span class="font-medium">{{ $comment->parent->user->username }}</span> đã viết:
+                                                        </p>
+                                                        <p class="text-sm text-gray-700 italic">{{ Str::limit($comment->quoted_content, 150) }}</p>
+                                                    </div>
                                                 @endif
+                                                <p class="text-sm text-gray-800 leading-relaxed" id="comment-content-{{ $comment->id }}">{{ $comment->content }}</p>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-gray-700" id="comment-content-{{ $comment->id }}">{{ $comment->content }}</p>
+
+                                        <!-- Reply Form (Hidden by default) -->
+                                        @if($userMembership)
+                                            <div id="reply-form-{{ $comment->id }}" class="hidden mt-3 ml-4">
+                                                <form method="POST" action="{{ route('guilds.posts.comments.store', [$guild->id, $post->id]) }}" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                                    @csrf
+                                                    <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                                    <div class="space-y-3">
+                                                        <!-- Quote Option (only show if comment doesn't have quoted_content) -->
+                                                        @if(!$comment->quoted_content)
+                                                            <div class="flex items-center space-x-2">
+                                                                <input type="checkbox" id="quote-{{ $comment->id }}" name="include_quote" value="1" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleQuoteContent({{ $comment->id }})">
+                                                                <label for="quote-{{ $comment->id }}" class="text-sm text-gray-700">Trích dẫn bình luận này</label>
+                                                            </div>
+                                                            
+                                                            <!-- Quote Content (Hidden by default) -->
+                                                            <div id="quote-content-{{ $comment->id }}" class="hidden">
+                                                                <div class="bg-white border border-gray-300 rounded-md p-3">
+                                                                    <p class="text-xs text-gray-600 mb-2">Nội dung trích dẫn:</p>
+                                                                    <div class="bg-gray-50 border-l-4 border-blue-400 pl-3 py-2 rounded-r-md">
+                                                                        <p class="text-sm text-gray-700 italic">{{ Str::limit($comment->content, 200) }}</p>
+                                                                    </div>
+                                                                    <input type="hidden" name="quoted_content" value="{{ Str::limit($comment->content, 200) }}">
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <!-- Show message that quoting is not allowed -->
+                                                            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                                                                <div class="flex items-center">
+                                                                    <svg class="w-4 h-4 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                                                    </svg>
+                                                                    <p class="text-sm text-yellow-800">Không thể trích dẫn bình luận đã có trích dẫn</p>
+                                                                </div>
+                                                            </div>
+                                                        @endif
+
+                                                        <!-- Reply Content -->
+                                                        <div>
+                                                            <textarea name="content" rows="3" required 
+                                                                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('content') border-red-500 focus:ring-red-500 @enderror" 
+                                                                      placeholder="Trả lời {{ $comment->user->username }}..."></textarea>
+                                                            @error('content')
+                                                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                                            @enderror
+                                                        </div>
+                                                        
+                                                        <div class="flex justify-end space-x-2">
+                                                            <button type="button" onclick="toggleReplyForm({{ $comment->id }})" 
+                                                                    class="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                                Hủy
+                                                            </button>
+                                                            <button type="submit" 
+                                                                    class="px-3 py-1 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                                Trả lời
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
-                            </div>
                             @endforeach
                         </div>
                     @else
@@ -331,6 +432,65 @@ function editComment(commentId, content) {
 
 function closeEditCommentModal() {
     document.getElementById('editCommentModal').classList.add('hidden');
+}
+
+function toggleReplyForm(commentId) {
+    const replyForm = document.getElementById('reply-form-' + commentId);
+    if (replyForm.classList.contains('hidden')) {
+        replyForm.classList.remove('hidden');
+        // Focus on textarea
+        const textarea = replyForm.querySelector('textarea[name="content"]');
+        if (textarea) {
+            textarea.focus();
+        }
+    } else {
+        replyForm.classList.add('hidden');
+        // Reset quote checkbox and hide quote content
+        const quoteCheckbox = document.getElementById('quote-' + commentId);
+        const quoteContent = document.getElementById('quote-content-' + commentId);
+        if (quoteCheckbox) quoteCheckbox.checked = false;
+        if (quoteContent) quoteContent.classList.add('hidden');
+    }
+}
+
+function toggleQuoteContent(commentId) {
+    const quoteCheckbox = document.getElementById('quote-' + commentId);
+    const quoteContent = document.getElementById('quote-content-' + commentId);
+    
+    if (quoteCheckbox.checked) {
+        quoteContent.classList.remove('hidden');
+    } else {
+        quoteContent.classList.add('hidden');
+    }
+}
+
+function quoteComment(commentId) {
+    // Check if quote checkbox exists (it won't exist if comment already has quoted_content)
+    const quoteCheckbox = document.getElementById('quote-' + commentId);
+    if (!quoteCheckbox) {
+        // If no quote checkbox, just open reply form without quoting
+        toggleReplyForm(commentId);
+        return;
+    }
+    
+    // Open reply form
+    toggleReplyForm(commentId);
+    
+    // Check quote checkbox and show quote content
+    setTimeout(() => {
+        const quoteContent = document.getElementById('quote-content-' + commentId);
+        
+        if (quoteCheckbox && quoteContent) {
+            quoteCheckbox.checked = true;
+            quoteContent.classList.remove('hidden');
+        }
+        
+        // Focus on textarea
+        const textarea = document.querySelector('#reply-form-' + commentId + ' textarea[name="content"]');
+        if (textarea) {
+            textarea.focus();
+        }
+    }, 100);
 }
 </script>
 @endsection

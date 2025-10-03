@@ -403,7 +403,14 @@ class GuildController extends Controller
     public function showPost($id, $postId)
     {
         $guild = Guild::findOrFail($id);
-        $post = GuildPost::with(['author', 'category', 'guild', 'comments.user', 'likes'])
+        $post = GuildPost::with([
+            'author', 
+            'category', 
+            'guild', 
+            'comments.user', 
+            'comments.parent.user',
+            'likes'
+        ])
             ->where('id', $postId)
             ->where('guild_id', $guild->id)
             ->firstOrFail();
@@ -596,18 +603,53 @@ class GuildController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:2000',
+            'parent_id' => 'nullable|exists:guild_post_comments,id',
+            'quoted_content' => 'nullable|string|max:500',
         ]);
 
-        GuildPostComment::create([
+        // If parent_id is provided, verify it belongs to the same post
+        if ($request->parent_id) {
+            $parentComment = GuildPostComment::where('id', $request->parent_id)
+                ->where('post_id', $post->id)
+                ->first();
+            
+            if (!$parentComment) {
+                return redirect()->back()->with('error', 'Bình luận gốc không hợp lệ.');
+            }
+            
+            // If parent comment already has quoted_content, don't allow quoting
+            if ($parentComment->quoted_content && $request->has('include_quote')) {
+                return redirect()->back()->with('error', 'Không thể trích dẫn bình luận đã có trích dẫn.');
+            }
+        }
+
+        // Handle quoted content
+        $quotedContent = null;
+        if ($request->parent_id && $request->has('include_quote') && $request->quoted_content) {
+            $quotedContent = $request->quoted_content;
+        }
+
+        $comment = GuildPostComment::create([
             'post_id' => $post->id,
             'user_id' => $user->id,
+            'parent_id' => $request->parent_id,
+            'quoted_content' => $quotedContent,
             'content' => $request->content,
         ]);
 
         // Create notification for post comment
         NotificationService::createPostCommentNotification($post->id, $user->id);
 
-        return redirect()->back()->with('success', 'Đã thêm bình luận!');
+        // If this is a reply, create notification for the parent comment author
+        if ($request->parent_id) {
+            $parentComment = GuildPostComment::find($request->parent_id);
+            if ($parentComment && $parentComment->user_id != $user->id) {
+                NotificationService::createCommentReplyNotification($comment->id, $parentComment->user_id);
+            }
+        }
+
+        $message = $request->parent_id ? 'Đã trả lời bình luận!' : 'Đã thêm bình luận!';
+        return redirect()->back()->with('success', $message);
     }
 
     /**

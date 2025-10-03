@@ -79,6 +79,29 @@ class NotificationService
     }
 
     /**
+     * Create a notification for comment reply
+     */
+    public static function createCommentReplyNotification($replyCommentId, $parentCommentUserId)
+    {
+        $replyComment = GuildPostComment::find($replyCommentId);
+        if (!$replyComment || $replyComment->user_id == $parentCommentUserId) {
+            return; // Don't notify if user replies to their own comment
+        }
+
+        $fromUser = User::find($replyComment->user_id);
+        $message = $fromUser->username . ' đã trả lời bình luận của bạn';
+        
+        AppNotification::create([
+            'user_id' => $parentCommentUserId,
+            'from_user_id' => $replyComment->user_id,
+            'type' => 'comment_reply',
+            'related_id' => $replyCommentId,
+            'related_type' => 'GuildPostComment',
+            'message' => $message,
+        ]);
+    }
+
+    /**
      * Mark notification as read
      */
     public static function markAsRead($notificationId, $userId)

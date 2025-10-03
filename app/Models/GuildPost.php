@@ -153,7 +153,7 @@ class GuildPost extends Model
     }
 
     /**
-     * Get all comments for this post
+     * Get all comments for this post (flat structure)
      */
     public function comments()
     {
@@ -169,11 +169,11 @@ class GuildPost extends Model
     }
 
     /**
-     * Get comments count for this post
+     * Get comments count for this post (including replies)
      */
     public function getCommentsCountAttribute()
     {
-        return $this->comments()->count();
+        return $this->hasMany(GuildPostComment::class, 'post_id')->count();
     }
 
     /**
