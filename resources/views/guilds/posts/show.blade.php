@@ -229,15 +229,15 @@
                                                 </span>
                                             </div>
                                         @endif
+                                        <p class="text-sm text-center font-semibold text-gray-900">{{ $comment->user->username }}</p>
                                     </div>
 
                                     <!-- Comment Content -->
                                     <div class="flex-1 min-w-0">
-                                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="bg-white min-h-[100px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
                                             <!-- Comment Header -->
                                             <div class="flex items-center justify-between mb-3">
                                                 <div class="flex items-center space-x-3">
-                                                    <p class="text-sm font-semibold text-gray-900">{{ $comment->user->username }}</p>
                                                     <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
                                                     @if($comment->created_at != $comment->updated_at)
                                                         <span class="text-xs text-gray-400">(đã chỉnh sửa)</span>
