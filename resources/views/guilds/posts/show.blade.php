@@ -99,7 +99,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
-                        <span>{{ $post->comments_count }}</span>
+                        <span>{{ $post->getTotalCommentsCount() }}</span>
                     </div>
 
                     <!-- Views Count -->
@@ -214,31 +214,31 @@
 
                 <!-- Comments List -->
                 <div class="px-6 py-4">
-                    @if($post->comments->count() > 0)
+                    @if($comments->count() > 0)
                         <div class="space-y-4">
-                            @foreach($post->comments as $comment)
-                                <div class="flex space-x-3">
+                            @foreach($comments as $comment)
+                            <div class="flex space-x-3">
                                     <!-- Avatar -->
-                                    <div class="flex-shrink-0">
-                                        @if($comment->user->avatar)
+                                <div class="flex-shrink-0">
+                                    @if($comment->user->avatar)
                                             <img src="{{ Storage::url($comment->user->avatar) }}" alt="Avatar" class="h-10 w-10 rounded-full object-cover">
-                                        @else
+                                    @else
                                             <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                                                 <span class="text-sm font-bold text-white">
-                                                    {{ strtoupper(substr($comment->user->username, 0, 1)) }}
-                                                </span>
-                                            </div>
-                                        @endif
+                                                {{ strtoupper(substr($comment->user->username, 0, 1)) }}
+                                            </span>
+                                        </div>
+                                    @endif
                                         <p class="text-sm text-center font-semibold text-gray-900">{{ $comment->user->username }}</p>
-                                    </div>
+                                </div>
 
                                     <!-- Comment Content -->
-                                    <div class="flex-1 min-w-0">
+                                <div class="flex-1 min-w-0">
                                         <div class="bg-white min-h-[100px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
                                             <!-- Comment Header -->
                                             <div class="flex items-center justify-between mb-3">
                                                 <div class="flex items-center space-x-3">
-                                                    <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
+                                                <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
                                                     @if($comment->created_at != $comment->updated_at)
                                                         <span class="text-xs text-gray-400">(đã chỉnh sửa)</span>
                                                     @endif
@@ -250,21 +250,21 @@
                                                             Trả lời {{ $comment->parent->user->username }}
                                                         </span>
                                                     @endif
-                                                </div>
+                                            </div>
                                                 
                                                 <!-- Comment Actions -->
-                                                <div class="flex items-center space-x-2">
-                                                    <!-- Like Comment Button -->
-                                                    <form method="POST" action="{{ route('guilds.posts.comments.like', [$guild->id, $post->id, $comment->id]) }}" class="inline">
-                                                        @csrf
-                                                        <button type="submit" 
+                                            <div class="flex items-center space-x-2">
+                                                <!-- Like Comment Button -->
+                                                <form method="POST" action="{{ route('guilds.posts.comments.like', [$guild->id, $post->id, $comment->id]) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" 
                                                                 class="flex items-center space-x-1 px-2 py-1 rounded-md text-xs font-medium transition-colors {{ $comment->isLikedBy(auth()->id()) ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-gray-500 hover:text-red-600 hover:bg-gray-100' }}">
                                                             <svg class="w-4 h-4 {{ $comment->isLikedBy(auth()->id()) ? 'fill-current' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                                            </svg>
-                                                            <span>{{ $comment->likes_count }}</span>
-                                                        </button>
-                                                    </form>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                                        </svg>
+                                                        <span>{{ $comment->likes_count }}</span>
+                                                    </button>
+                                                </form>
 
                                                     <!-- Reply Button -->
                                                     @if($userMembership)
@@ -278,28 +278,33 @@
                                                     @endif
 
                                                     <!-- Edit/Delete Actions -->
-                                                    @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
-                                                    <div class="flex items-center space-x-1">
-                                                        @if($comment->canEdit(auth()->id()))
-                                                            <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
+                                                @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
+                                                <div class="flex items-center space-x-1">
+                                                    @if($comment->canEdit(auth()->id()))
+                                                        <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
                                                                     class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
-                                                                Sửa
-                                                            </button>
-                                                        @endif
-                                                        @if($comment->canDelete(auth()->id()))
-                                                            <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
-                                                                  onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="inline">
-                                                                @csrf
-                                                                @method('DELETE')
+                                                            Sửa
+                                                        </button>
+                                                    @endif
+                                                    @if($comment->canDelete(auth()->id()))
+                                                        <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
+                                                              onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
                                                                 <button type="submit" class="px-2 py-1 rounded-md text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors">
-                                                                    Xóa
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
+                                                                Xóa
+                                                            </button>
+                                                        </form>
                                                     @endif
                                                 </div>
+                                                @endif
+
+                                                <!-- Count comments -->
+                                                <div class="text-xs text-gray-500">
+                                                    # {{ $comment->id }}
+                                                </div>
                                             </div>
+                                        </div>
 
                                             <!-- Comment Content -->
                                             <div class="mb-3">
@@ -375,10 +380,17 @@
                                                 </form>
                                             </div>
                                         @endif
-                                    </div>
                                 </div>
+                            </div>
                             @endforeach
                         </div>
+                        
+                        <!-- Comments Pagination -->
+                        @if($comments->hasPages())
+                            <div class="mt-6">
+                                {{ $comments->links('vendor.pagination.tailwind') }}
+                            </div>
+                        @endif
                     @else
                         <div class="text-center py-8">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

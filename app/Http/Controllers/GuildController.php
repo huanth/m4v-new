@@ -407,13 +407,16 @@ class GuildController extends Controller
             'author', 
             'category', 
             'guild', 
-            'comments.user', 
-            'comments.parent.user',
             'likes'
         ])
             ->where('id', $postId)
             ->where('guild_id', $guild->id)
             ->firstOrFail();
+
+        // Load comments with pagination
+        $comments = $post->comments()
+            ->with(['user', 'parent.user'])
+            ->paginate(10);
 
         $user = Auth::user();
         $userMembership = null;
@@ -424,7 +427,7 @@ class GuildController extends Controller
         // Increment views count
         $post->incrementViews();
 
-        return view('guilds.posts.show', compact('guild', 'post', 'userMembership'));
+        return view('guilds.posts.show', compact('guild', 'post', 'userMembership', 'comments'));
     }
 
     /**

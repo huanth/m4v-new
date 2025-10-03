@@ -177,6 +177,14 @@ class GuildPost extends Model
     }
 
     /**
+     * Get total comments count for this post (for display purposes)
+     */
+    public function getTotalCommentsCount()
+    {
+        return $this->hasMany(GuildPostComment::class, 'post_id')->count();
+    }
+
+    /**
      * Check if user has liked this post
      */
     public function isLikedBy($userId)
