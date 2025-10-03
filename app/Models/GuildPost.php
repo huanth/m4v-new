@@ -59,11 +59,15 @@ class GuildPost extends Model
     }
 
     /**
-     * Scope to order posts by pinned first, then by created_at
+     * Scope to order posts by pinned first, then by activity (likes + comments), then by created_at
      */
     public function scopeOrdered($query)
     {
-        return $query->orderBy('is_pinned', 'desc')
+        return $query->selectRaw('guild_posts.*, 
+                (SELECT COUNT(*) FROM guild_post_likes WHERE guild_post_likes.post_id = guild_posts.id) as likes_count,
+                (SELECT COUNT(*) FROM guild_post_comments WHERE guild_post_comments.post_id = guild_posts.id) as comments_count')
+                    ->orderBy('is_pinned', 'desc')
+                    ->orderByRaw('(likes_count + comments_count) DESC')
                     ->orderBy('created_at', 'desc');
     }
 

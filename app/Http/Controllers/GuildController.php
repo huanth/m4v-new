@@ -636,6 +636,9 @@ class GuildController extends Controller
             'content' => $request->content,
         ]);
 
+        // Clear any potential cache for this post
+        \Cache::forget("post_activity_{$post->id}");
+
         // Create notification for post comment
         NotificationService::createPostCommentNotification($post->id, $user->id);
 
