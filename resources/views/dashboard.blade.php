@@ -90,7 +90,7 @@
                 <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                     <h2 class="text-lg font-medium text-yellow-900 mb-4">Bảng điều khiển quản trị</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <a href="#" class="bg-yellow-100 hover:bg-yellow-200 rounded-lg p-4 transition-colors">
+                        <a href="{{ route('admin.users.index') }}" class="bg-yellow-100 hover:bg-yellow-200 rounded-lg p-4 transition-colors">
                             <h3 class="font-medium text-yellow-900">Quản lý người dùng</h3>
                             <p class="text-sm text-yellow-700">Xem và quản lý tài khoản người dùng</p>
                         </a>

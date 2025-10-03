@@ -199,7 +199,12 @@ class GuildController extends Controller
         
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
         
-        if (!$userMembership || !$userMembership->canManageRoles()) {
+        // Check if user has management permissions
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canManageRoles())) {
             return redirect()->back()->with('error', 'Bạn không có quyền quản lý role.');
         }
 
@@ -236,7 +241,12 @@ class GuildController extends Controller
         
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
         
-        if (!$userMembership || !$userMembership->canCreateCategories()) {
+        // Check if user has management permissions
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
             return redirect()->back()->with('error', 'Bạn không có quyền tạo danh mục.');
         }
 
@@ -265,7 +275,12 @@ class GuildController extends Controller
         
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
         
-        if (!$userMembership || !$userMembership->canCreateCategories()) {
+        // Check if user has management permissions
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
             return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa danh mục.');
         }
 
@@ -300,7 +315,12 @@ class GuildController extends Controller
         
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
         
-        if (!$userMembership || !$userMembership->canCreateCategories()) {
+        // Check if user has management permissions
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
             return redirect()->back()->with('error', 'Bạn không có quyền xóa danh mục.');
         }
 
@@ -719,7 +739,11 @@ class GuildController extends Controller
         }
 
         // Check if user has management permissions
-        if (!$userMembership || !$userMembership->canManageRoles()) {
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canManageRoles())) {
             return redirect()->route('guilds.show', $id)->with('error', 'Bạn không có quyền quản lý bang hội này.');
         }
 
@@ -737,7 +761,11 @@ class GuildController extends Controller
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
 
         // Check if user has management permissions
-        if (!$userMembership || !$userMembership->canManageRoles()) {
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canManageRoles())) {
             return redirect()->back()->with('error', 'Bạn không có quyền quản lý bang hội này.');
         }
 
@@ -776,7 +804,11 @@ class GuildController extends Controller
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
 
         // Check if user has management permissions
-        if (!$userMembership || !$userMembership->canManageRoles()) {
+        // Super Admin and Admin have full access to all guilds
+        $canManage = $user->isSuperAdmin() || $user->isAdmin();
+        
+        // Or if user is a member with management permissions
+        if (!$canManage && (!$userMembership || !$userMembership->canManageRoles())) {
             return redirect()->back()->with('error', 'Bạn không có quyền quản lý bang hội này.');
         }
 
