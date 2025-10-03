@@ -219,11 +219,11 @@
                             @foreach($comments as $comment)
                             <div class="flex space-x-3">
                                     <!-- Avatar -->
-                                <div class="flex-shrink-0">
+                                <div class="flex-shrink-0 w-1/12 flex flex-col items-center">
                                     @if($comment->user->avatar)
-                                            <img src="{{ Storage::url($comment->user->avatar) }}" alt="Avatar" class="h-10 w-10 rounded-full object-cover">
+                                            <img src="{{ Storage::url($comment->user->avatar) }}" alt="Avatar" class="h-10 w-10 rounded-full object-cover box-shadow">
                                     @else
-                                            <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                                            <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center box-shadow">
                                                 <span class="text-sm font-bold text-white">
                                                 {{ strtoupper(substr($comment->user->username, 0, 1)) }}
                                             </span>
@@ -233,7 +233,7 @@
                                 </div>
 
                                     <!-- Comment Content -->
-                                <div class="flex-1 min-w-0">
+                                <div class="flex-1 min-w-0 w-5/12">
                                         <div class="bg-white min-h-[100px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
                                             <!-- Comment Header -->
                                             <div class="flex items-center justify-between mb-3">
