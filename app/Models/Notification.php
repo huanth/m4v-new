@@ -78,4 +78,33 @@ class Notification extends Model
     {
         $this->update(['is_read' => false]);
     }
+
+    /**
+     * Get the URL for this notification
+     */
+    public function getUrl()
+    {
+        switch ($this->type) {
+            case 'post_like':
+            case 'post_comment':
+                // For post-related notifications, link to the post
+                if ($this->related_type === 'App\Models\GuildPost') {
+                    $post = $this->related;
+                    return route('guilds.posts.show', [$post->guild_id, $post->id]);
+                }
+                break;
+                
+            case 'comment_like':
+            case 'comment_reply':
+                // For comment-related notifications, link to the post containing the comment
+                if ($this->related_type === 'App\Models\GuildPostComment') {
+                    $comment = $this->related;
+                    $post = $comment->post;
+                    return route('guilds.posts.show', [$post->guild_id, $post->id]) . '#comment-' . $comment->id;
+                }
+                break;
+        }
+        
+        return '#';
+    }
 }

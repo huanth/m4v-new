@@ -33,8 +33,9 @@
             @if($notifications->count() > 0)
                 <div class="divide-y divide-gray-200">
                     @foreach($notifications as $notification)
-                        <div class="p-6 hover:bg-gray-50 transition-colors {{ !$notification->is_read ? 'bg-blue-50' : '' }}">
-                            <div class="flex items-start space-x-4">
+                        <a href="{{ $notification->getUrl() }}" class="block">
+                            <div class="p-6 hover:bg-gray-50 transition-colors {{ !$notification->is_read ? 'bg-blue-50' : '' }}">
+                                <div class="flex items-start space-x-4">
                                 <!-- Avatar -->
                                 <div class="flex-shrink-0">
                                     @if($notification->fromUser->avatar)
@@ -64,28 +65,13 @@
                                         <!-- Actions -->
                                         <div class="flex items-center space-x-2">
                                             @if(!$notification->is_read)
-                                                <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}" class="inline">
+                                                <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}" class="inline" onclick="event.stopPropagation()">
                                                     @csrf
                                                     <button type="submit" 
                                                             class="text-xs text-blue-600 hover:text-blue-800 font-medium">
                                                         Đánh dấu đã đọc
                                                     </button>
                                                 </form>
-                                            @endif
-                                            
-                                            <!-- Link to related content -->
-                                            @if($notification->type === 'post_like' || $notification->type === 'post_comment')
-                                                <a href="#" 
-                                                   class="text-xs text-gray-500 hover:text-gray-700"
-                                                   onclick="alert('Tính năng này sẽ được cập nhật sớm')">
-                                                    Xem bài viết
-                                                </a>
-                                            @elseif($notification->type === 'comment_like')
-                                                <a href="#" 
-                                                   class="text-xs text-gray-500 hover:text-gray-700"
-                                                   onclick="alert('Tính năng này sẽ được cập nhật sớm')">
-                                                    Xem bình luận
-                                                </a>
                                             @endif
                                         </div>
                                     </div>
@@ -98,7 +84,8 @@
                                     </div>
                                 @endif
                             </div>
-                        </div>
+                            </div>
+                        </a>
                     @endforeach
                 </div>
             @else

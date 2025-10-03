@@ -141,7 +141,7 @@ class NotificationService
     public static function getNotifications($userId, $limit = 20)
     {
         return AppNotification::where('user_id', $userId)
-            ->with(['fromUser', 'related'])
+            ->with(['fromUser', 'related.post', 'related.guild'])
             ->latest()
             ->limit($limit)
             ->get();

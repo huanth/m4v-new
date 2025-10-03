@@ -217,7 +217,7 @@
                     @if($comments->count() > 0)
                         <div class="space-y-4">
                             @foreach($comments as $comment)
-                            <div class="flex space-x-3">
+                                <div id="comment-{{ $comment->id }}" class="flex space-x-3">
                                     <!-- Avatar -->
                                 <div class="flex-shrink-0 w-1/12 flex flex-col items-center">
                                     @if($comment->user->avatar)
@@ -295,7 +295,7 @@
                                                 </form>
 
                                                     <!-- Reply Button -->
-                                                    @if($userMembership)
+                                                    @if(auth()->check())
                                                         <button onclick="toggleReplyForm({{ $comment->id }})" 
                                                                 class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
                                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,6 +303,8 @@
                                                             </svg>
                                                             Trả lời
                                                         </button>
+                                                        
+                                                        
                                                     @endif
 
                                                     <!-- Edit/Delete Actions -->
@@ -365,7 +367,7 @@
                                         </div>
 
                                         <!-- Reply Form (Hidden by default) -->
-                                        @if($userMembership)
+                                        @if(auth()->check())
                                             <div id="reply-form-{{ $comment->id }}" class="hidden mt-3 ml-4">
                                                 <form method="POST" action="{{ route('guilds.posts.comments.store', [$guild->id, $post->id]) }}" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                                                     @csrf
