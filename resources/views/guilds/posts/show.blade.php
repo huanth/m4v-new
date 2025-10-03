@@ -229,12 +229,12 @@
                                             </span>
                                         </div>
                                     @endif
-                                        <p class="text-sm text-center font-semibold text-gray-900">{{ $comment->user->username }}</p>
+                                        <p class="text-sm text-center font-semibold text-gray-900" style="word-break: break-word;">{{ $comment->user->username }}</p>
                                 </div>
 
                                     <!-- Comment Content -->
                                 <div class="flex-1 min-w-0 w-5/12">
-                                        <div class="bg-white min-h-[100px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="bg-white min-h-[150px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
                                             <!-- Comment Header -->
                                             <div class="flex items-center justify-between mb-3">
                                                 <div class="flex items-center space-x-3">
