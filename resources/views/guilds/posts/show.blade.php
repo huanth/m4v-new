@@ -264,7 +264,7 @@
                                 <div class="flex-1 min-w-0 w-5/12">
                                         <div class="bg-white min-h-[150px] h-auto border border-gray-200 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition-shadow">
                                             <!-- Comment Header -->
-                                            <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center justify-between mb-3 flex-col sm:flex-row items-start">
                                                 <div class="flex items-center space-x-3">
                                                 <span class="text-xs text-gray-500">{{ $comment->created_at->format('d/m/Y H:i') }}</span>
                                                     @if($comment->created_at != $comment->updated_at)
