@@ -66,56 +66,405 @@ Một nền tảng cộng đồng trực tuyến được xây dựng với Lara
 
 ## 🚀 Cài đặt
 
-### 1. Clone repository
+### 📋 Yêu cầu hệ thống
+- **PHP**: >= 8.1
+- **Composer**: Latest version
+- **Node.js**: >= 16.x & NPM
+- **MySQL**: >= 5.7 hoặc MariaDB >= 10.2
+- **Web Server**: Apache/Nginx
+- **SSL Certificate**: (Khuyến nghị cho production)
+
+### 🖥️ Cài đặt trên Server (Production)
+
+#### 1. Clone repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/your-username/m4v-clone.git
 cd m4v-clone
 ```
 
-### 2. Cài đặt dependencies
+#### 2. Cài đặt dependencies
+```bash
+# Cài đặt PHP dependencies
+composer install --optimize-autoloader --no-dev
+
+# Cài đặt Node.js dependencies
+npm install
+
+# Build assets cho production
+npm run build
+```
+
+#### 3. Cấu hình môi trường
+```bash
+# Copy file environment
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+
+# Chỉnh sửa file .env cho production
+nano .env
+```
+
+#### 4. Cấu hình .env cho Production
+```env
+APP_NAME="M4V.ME"
+APP_ENV=production
+APP_KEY=base64:your-generated-key
+APP_DEBUG=false
+APP_URL=https://yourdomain.com
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=m4v_production
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_secure_password
+
+# Cache & Session
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+# Redis (Khuyến nghị cho production)
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+# Mail (SMTP)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@yourdomain.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# Pusher (Real-time)
+PUSHER_APP_ID=your-app-id
+PUSHER_APP_KEY=your-app-key
+PUSHER_APP_SECRET=your-app-secret
+PUSHER_APP_CLUSTER=your-cluster
+
+# File Storage
+FILESYSTEM_DISK=local
+```
+
+#### 5. Tạo database và user
+```sql
+-- Đăng nhập MySQL
+mysql -u root -p
+
+-- Tạo database
+CREATE DATABASE m4v_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Tạo user
+CREATE USER 'm4v_user'@'localhost' IDENTIFIED BY 'strong_password_here';
+
+-- Cấp quyền
+GRANT ALL PRIVILEGES ON m4v_production.* TO 'm4v_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+#### 6. Chạy migrations và seeder
+```bash
+# Chạy migrations
+php artisan migrate --force
+
+# Chạy seeder (tạo tài khoản admin mặc định)
+php artisan db:seed --force
+```
+
+#### 7. Cấu hình storage và permissions
+```bash
+# Tạo symbolic link cho storage
+php artisan storage:link
+
+# Set permissions
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+sudo chmod -R 755 public
+```
+
+#### 8. Tối ưu hóa cho Production
+```bash
+# Cache configuration
+php artisan config:cache
+
+# Cache routes
+php artisan route:cache
+
+# Cache views
+php artisan view:cache
+
+# Optimize autoloader
+composer dump-autoload --optimize
+```
+
+### 🌐 Cấu hình Web Server
+
+#### Nginx Configuration
+```nginx
+server {
+    listen 80;
+    listen 443 ssl http2;
+    server_name yourdomain.com www.yourdomain.com;
+    root /path/to/m4v-clone/public;
+    
+    # SSL Configuration
+    ssl_certificate /path/to/ssl/cert.pem;
+    ssl_certificate_key /path/to/ssl/private.key;
+    
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    
+    index index.php;
+    
+    charset utf-8;
+    
+    # Handle Laravel routes
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    # PHP handling
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    
+    # Deny access to hidden files
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+    
+    # Security headers
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Referrer-Policy "strict-origin-when-cross-origin";
+}
+```
+
+#### Apache Configuration (.htaccess)
+```apache
+# File: public/.htaccess
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+```
+
+### 🔧 Cài đặt trên Local Development
+
+#### 1. Clone và setup
+```bash
+git clone https://github.com/your-username/m4v-clone.git
+cd m4v-clone
+```
+
+#### 2. Cài đặt dependencies
 ```bash
 composer install
 npm install
 ```
 
-### 3. Cấu hình môi trường
+#### 3. Cấu hình environment
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Cấu hình database
-Chỉnh sửa file `.env`:
+#### 4. Cấu hình .env cho Development
 ```env
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+# Database local
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=m4v_clone
+DB_DATABASE=m4v_local
 DB_USERNAME=root
 DB_PASSWORD=
+
+# Queue sync cho development
+QUEUE_CONNECTION=sync
 ```
 
-### 5. Chạy migrations
+#### 5. Setup database
 ```bash
+# Tạo database local
+mysql -u root -p
+CREATE DATABASE m4v_local CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# Chạy migrations
 php artisan migrate
 php artisan db:seed
-```
 
-### 6. Tạo symbolic link cho storage
-```bash
+# Tạo storage link
 php artisan storage:link
 ```
 
-### 7. Build assets
+#### 6. Chạy development server
 ```bash
-npm run build
-# hoặc cho development
+# Build assets
+npm run dev
+
+# Chạy Laravel server
+php artisan serve
+
+# Hoặc chạy Vite dev server
 npm run dev
 ```
 
-### 8. Chạy server
+### 🐳 Docker Deployment (Tùy chọn)
+
+#### docker-compose.yml
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: m4v-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - m4v-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: m4v-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - m4v-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: m4v-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: m4v_production
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: m4v_user
+      MYSQL_PASSWORD: user_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - m4v-network
+
+  redis:
+    image: redis:alpine
+    container_name: m4v-redis
+    restart: unless-stopped
+    networks:
+      - m4v-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  m4v-network:
+    driver: bridge
+```
+
+### 🔄 Scripts tự động hóa
+
+#### deploy.sh (Production)
 ```bash
-php artisan serve
+#!/bin/bash
+
+echo "🚀 Deploying M4V.ME..."
+
+# Pull latest code
+git pull origin main
+
+# Install/Update dependencies
+composer install --optimize-autoloader --no-dev
+npm install
+npm run build
+
+# Run migrations
+php artisan migrate --force
+
+# Clear and cache
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Set permissions
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+
+echo "✅ Deployment completed!"
+```
+
+#### setup.sh (First time setup)
+```bash
+#!/bin/bash
+
+echo "🔧 Setting up M4V.ME for the first time..."
+
+# Copy environment file
+cp .env.example .env
+
+# Install dependencies
+composer install
+npm install
+
+# Generate key
+php artisan key:generate
+
+# Build assets
+npm run build
+
+# Run migrations and seed
+php artisan migrate --force
+php artisan db:seed --force
+
+# Create storage link
+php artisan storage:link
+
+# Set permissions
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+
+echo "✅ Setup completed!"
+echo "🌐 Visit your site at: http://your-domain.com"
+echo "👤 Login with: admin / password"
 ```
 
 ## 🔧 Cấu hình bổ sung
@@ -266,11 +615,195 @@ routes/
 
 Dự án này được phân phối dưới MIT License. Xem file `LICENSE` để biết thêm chi tiết.
 
-## 📞 Liên hệ
+## 🔧 Troubleshooting
 
+### ❌ Lỗi thường gặp
+
+#### 1. Permission denied errors
+```bash
+# Fix permissions
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R 775 storage bootstrap/cache
+sudo chmod -R 755 public
+```
+
+#### 2. Database connection errors
+```bash
+# Check database service
+sudo systemctl status mysql
+
+# Test connection
+php artisan tinker
+DB::connection()->getPdo();
+```
+
+#### 3. Storage link errors
+```bash
+# Remove existing link and recreate
+rm public/storage
+php artisan storage:link
+```
+
+#### 4. Cache issues
+```bash
+# Clear all caches
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Rebuild caches
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+#### 5. Composer/Node issues
+```bash
+# Clear composer cache
+composer clear-cache
+composer install --no-cache
+
+# Clear npm cache
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### 🔍 Debug Commands
+
+```bash
+# Check Laravel configuration
+php artisan config:show
+
+# Check database migrations status
+php artisan migrate:status
+
+# Check routes
+php artisan route:list
+
+# Check queue status
+php artisan queue:work --verbose
+
+# Check storage link
+ls -la public/storage
+```
+
+### 📊 Performance Monitoring
+
+```bash
+# Check application performance
+php artisan about
+
+# Monitor database queries
+# Add DB::enableQueryLog() in code
+# Use DB::getQueryLog() to see queries
+
+# Check memory usage
+php -i | grep memory_limit
+```
+
+## 🛡️ Security Best Practices
+
+### 🔒 Server Security
+- **SSL Certificate**: Luôn sử dụng HTTPS
+- **Firewall**: Chỉ mở ports cần thiết (80, 443, 22)
+- **Regular Updates**: Cập nhật PHP, MySQL, server OS
+- **Backup**: Tự động backup database và files
+
+### 🔐 Application Security
+- **Environment Variables**: Không commit .env file
+- **Strong Passwords**: Sử dụng mật khẩu mạnh cho database
+- **Input Validation**: Validate tất cả user input
+- **CSRF Protection**: Laravel tự động enable
+- **SQL Injection**: Sử dụng Eloquent ORM
+
+### 📁 File Permissions
+```bash
+# Secure file permissions
+find storage -type f -exec chmod 664 {} \;
+find storage -type d -exec chmod 775 {} \;
+find bootstrap/cache -type f -exec chmod 664 {} \;
+find bootstrap/cache -type d -exec chmod 775 {} \;
+```
+
+## 🚀 Production Checklist
+
+### ✅ Pre-deployment
+- [ ] Set `APP_ENV=production`
+- [ ] Set `APP_DEBUG=false`
+- [ ] Configure production database
+- [ ] Setup SSL certificate
+- [ ] Configure email settings
+- [ ] Setup Redis/Memcached
+- [ ] Configure file storage
+- [ ] Setup monitoring/logging
+
+### ✅ Post-deployment
+- [ ] Test all major features
+- [ ] Check database connections
+- [ ] Verify email functionality
+- [ ] Test file uploads
+- [ ] Check real-time features
+- [ ] Monitor performance
+- [ ] Setup automated backups
+- [ ] Configure error monitoring
+
+### 📈 Performance Optimization
+
+#### Database
+```sql
+-- Add indexes for better performance
+ALTER TABLE guild_posts ADD INDEX idx_created_at (created_at);
+ALTER TABLE guild_post_comments ADD INDEX idx_post_id (post_id);
+ALTER TABLE guild_post_likes ADD INDEX idx_post_id (post_id);
+```
+
+#### PHP Configuration
+```ini
+; php.ini optimizations
+memory_limit = 256M
+max_execution_time = 300
+upload_max_filesize = 10M
+post_max_size = 10M
+opcache.enable = 1
+opcache.memory_consumption = 128
+```
+
+#### Web Server
+```nginx
+# Nginx optimizations
+gzip on;
+gzip_types text/css application/javascript application/json;
+
+# Cache static files
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+```
+
+## 📞 Support & Community
+
+### 🆘 Getting Help
+- **Documentation**: Check this README first
+- **Issues**: Create GitHub issue for bugs
+- **Discussions**: Use GitHub Discussions for questions
+
+### 🤝 Contributing
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+### 📧 Contact
 - **Email**: support@m4v.me
 - **Website**: https://m4v.me
+- **GitHub**: https://github.com/your-username/m4v-clone
 
 ---
 
 **M4V.ME** - Nơi kết nối cộng đồng đích thực! 🎉
+
+*Built with ❤️ using Laravel & Tailwind CSS*
