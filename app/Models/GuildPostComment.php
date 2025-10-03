@@ -67,11 +67,22 @@ class GuildPostComment extends Model
             return true;
         }
 
-        // Guild leaders and vice leaders can edit
+        // Get user to check global roles
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        // SADMIN and ADMIN can edit any comment
+        if (in_array($user->role, ['SADMIN', 'ADMIN'])) {
+            return true;
+        }
+
+        // Guild leaders, vice leaders, and elders can edit comments in their guild
         $guild = $this->post->guild;
         $userMembership = $guild->members()->where('user_id', $userId)->first();
         
-        if ($userMembership && $userMembership->isAdmin()) {
+        if ($userMembership && in_array($userMembership->role, ['leader', 'vice_leader', 'elder'])) {
             return true;
         }
 
@@ -88,11 +99,22 @@ class GuildPostComment extends Model
             return true;
         }
 
-        // Guild leaders and vice leaders can delete
+        // Get user to check global roles
+        $user = User::find($userId);
+        if (!$user) {
+            return false;
+        }
+
+        // SADMIN and ADMIN can delete any comment
+        if (in_array($user->role, ['SADMIN', 'ADMIN'])) {
+            return true;
+        }
+
+        // Guild leaders, vice leaders, and elders can delete comments in their guild
         $guild = $this->post->guild;
         $userMembership = $guild->members()->where('user_id', $userId)->first();
         
-        if ($userMembership && $userMembership->isAdmin()) {
+        if ($userMembership && in_array($userMembership->role, ['leader', 'vice_leader', 'elder'])) {
             return true;
         }
 

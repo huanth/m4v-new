@@ -306,26 +306,42 @@
                                                     @endif
 
                                                     <!-- Edit/Delete Actions -->
-                                                @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
-                                                <div class="flex items-center space-x-1">
-                                                    @if($comment->canEdit(auth()->id()))
-                                                        <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
+                                                    @if($comment->canEdit(auth()->id()) || $comment->canDelete(auth()->id()))
+                                                    <div class="flex items-center space-x-1">
+                                                        @if($comment->canEdit(auth()->id()))
+                                                            <button onclick="editComment({{ $comment->id }}, '{{ addslashes($comment->content) }}')" 
                                                                     class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
-                                                            Sửa
-                                                        </button>
-                                                    @endif
-                                                    @if($comment->canDelete(auth()->id()))
-                                                        <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
-                                                              onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                                <button type="submit" class="px-2 py-1 rounded-md text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors">
-                                                                Xóa
+                                                                Sửa
                                                             </button>
-                                                        </form>
+                                                        @endif
+                                                        @if($comment->canDelete(auth()->id()))
+                                                            @php
+                                                                $canDeleteReason = '';
+                                                                if ($comment->user_id == auth()->id()) {
+                                                                    $canDeleteReason = 'Tác giả';
+                                                                } elseif (in_array(auth()->user()->role, ['SADMIN', 'ADMIN'])) {
+                                                                    $canDeleteReason = auth()->user()->role;
+                                                                } else {
+                                                                    $guildMember = $guild->members()->where('user_id', auth()->id())->first();
+                                                                    if ($guildMember && in_array($guildMember->role, ['leader', 'vice_leader', 'elder'])) {
+                                                                        $canDeleteReason = $guildMember->role_display_name;
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            <form method="POST" action="{{ route('guilds.posts.comments.delete', [$guild->id, $post->id, $comment->id]) }}" 
+                                                                  onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này? (Quyền: {{ $canDeleteReason }})')" class="inline">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="px-2 py-1 rounded-md text-xs font-medium text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors" title="Xóa bình luận (Quyền: {{ $canDeleteReason }})">
+                                                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                                    </svg>
+                                                                    Xóa
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
                                                     @endif
-                                                </div>
-                                                @endif
 
                                                 <!-- Count comments -->
                                                 <div class="text-xs text-gray-500">
