@@ -51,6 +51,14 @@ class GuildPost extends Model
     }
 
     /**
+     * Alias for author relationship
+     */
+    public function user()
+    {
+        return $this->author();
+    }
+
+    /**
      * Scope to order posts by pinned first, then by created_at
      */
     public function scopeOrdered($query)

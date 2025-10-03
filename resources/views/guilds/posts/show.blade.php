@@ -56,7 +56,7 @@
                     <div class="flex items-center space-x-4">
                         <div class="flex items-center space-x-2">
                             @if($post->author->avatar)
-                                <img src="{{ Storage::url($post->author->avatar) }}" alt="Avatar" class="h-6 w-6 rounded-full object-cover">
+                                <img src="{{ Storage::url($post->author->avatar) }}" alt="Avatar" class="h-[50px] w-[50px] rounded-full object-cover">
                             @else
                                 <div class="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
                                     <span class="text-xs font-bold text-white">
@@ -64,7 +64,36 @@
                                     </span>
                                 </div>
                             @endif
-                            <span class="font-medium">{{ $post->author->username }}</span>
+                            <div class="flex flex-col h-full">
+                                <!-- Username -->
+                                @php
+                                    $username = $post->author->username;
+                                    $usernameColor = match($post->author->role) {
+                                        'SADMIN' => 'text-red-700',
+                                        'ADMIN' => 'text-orange-600',
+                                        'SMod' => 'text-green-600',
+                                        'FMod' => 'text-blue-600',
+                                        default => 'text-gray-900',
+                                    };
+                                @endphp
+                                <span class="font-medium {{ $usernameColor }}">{{ $username }}</span>
+
+                                <!-- Role in guild -->
+                                @php
+                                    $guildMember = $guild->members()->where('user_id', $post->author->id)->first();
+                                    $guildRole = $guildMember ? $guildMember->role : null;
+                                    $guildRoleColor = match($guildRole) {
+                                        'leader' => 'text-red-700',
+                                        'vice_leader' => 'text-orange-600',
+                                        'elder' => 'text-green-600',
+                                        'member' => 'text-gray-700',
+                                        default => 'text-gray-400',
+                                    };
+                                @endphp
+                                @if($guildMember && $guildMember->role !== 'member')
+                                    <span class="text-xs {{ $guildRoleColor }}">[{{ $guildMember->role_display_name }}]</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -213,7 +242,7 @@
                 </div>
 
                 <!-- Comments List -->
-                <div class="px-6 py-4">
+                <div class="py-4">
                     @if($comments->count() > 0)
                         <div class="space-y-4">
                             @foreach($comments as $comment)
