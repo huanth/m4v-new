@@ -229,7 +229,35 @@
                                             </span>
                                         </div>
                                     @endif
-                                        <p class="text-sm text-center font-semibold text-gray-900" style="word-break: break-word;">{{ $comment->user->username }}</p>
+                                        @php
+                                            $role = $comment->user->role;
+                                            $roleColor = match($role) {
+                                                'SADMIN' => 'text-red-700',
+                                                'ADMIN' => 'text-orange-600',
+                                                'SMod' => 'text-green-600',
+                                                'FMod' => 'text-blue-600',
+                                                default => 'text-gray-900',
+                                            };
+                                        @endphp
+                                        <p class="text-sm text-center font-semibold {{ $roleColor }}" style="word-break: break-word;">
+                                            {{ $comment->user->username }}
+                                        </p>
+
+                                        <!-- Role in guild -->
+                                        @php
+                                            $guildMember = $guild->members()->where('user_id', $comment->user->id)->first();
+                                            $guildRole = $guildMember ? $guildMember->role : null;
+                                            $guildRoleColor = match($guildRole) {
+                                                'leader' => 'text-red-700',
+                                                'vice_leader' => 'text-orange-600',
+                                                'elder' => 'text-green-600',
+                                                'member' => 'text-gray-700',
+                                                default => 'text-gray-400',
+                                            };
+                                        @endphp
+                                        @if($guildMember && $guildMember->role !== 'member')
+                                            <p class="text-xs text-center {{ $guildRoleColor }}">[{{ $guildMember->role_display_name }}]</p>
+                                        @endif
                                 </div>
 
                                     <!-- Comment Content -->
