@@ -620,10 +620,6 @@ class GuildController extends Controller
                 return redirect()->back()->with('error', 'Bình luận gốc không hợp lệ.');
             }
             
-            // If parent comment already has quoted_content, don't allow quoting
-            if ($parentComment->quoted_content && $request->has('include_quote')) {
-                return redirect()->back()->with('error', 'Không thể trích dẫn bình luận đã có trích dẫn.');
-            }
         }
 
         // Handle quoted content

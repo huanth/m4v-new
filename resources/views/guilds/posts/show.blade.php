@@ -304,7 +304,6 @@
                                                             Trả lời
                                                         </button>
                                                         
-                                                        
                                                     @endif
 
                                                     <!-- Edit/Delete Actions -->
@@ -373,34 +372,22 @@
                                                     @csrf
                                                     <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                                                     <div class="space-y-3">
-                                                        <!-- Quote Option (only show if comment doesn't have quoted_content) -->
-                                                        @if(!$comment->quoted_content)
-                                                            <div class="flex items-center space-x-2">
-                                                                <input type="checkbox" id="quote-{{ $comment->id }}" name="include_quote" value="1" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleQuoteContent({{ $comment->id }})">
-                                                                <label for="quote-{{ $comment->id }}" class="text-sm text-gray-700">Trích dẫn bình luận này</label>
-                                                            </div>
-                                                            
-                                                            <!-- Quote Content (Hidden by default) -->
-                                                            <div id="quote-content-{{ $comment->id }}" class="hidden">
-                                                                <div class="bg-white border border-gray-300 rounded-md p-3">
-                                                                    <p class="text-xs text-gray-600 mb-2">Nội dung trích dẫn:</p>
-                                                                    <div class="bg-gray-50 border-l-4 border-blue-400 pl-3 py-2 rounded-r-md">
-                                                                        <p class="text-sm text-gray-700 italic">{{ Str::limit($comment->content, 200) }}</p>
-                                                                    </div>
-                                                                    <input type="hidden" name="quoted_content" value="{{ Str::limit($comment->content, 200) }}">
+                                                        <!-- Quote Option -->
+                                                        <div class="flex items-center space-x-2">
+                                                            <input type="checkbox" id="quote-{{ $comment->id }}" name="include_quote" value="1" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" onchange="toggleQuoteContent({{ $comment->id }})">
+                                                            <label for="quote-{{ $comment->id }}" class="text-sm text-gray-700">Trích dẫn bình luận này</label>
+                                                        </div>
+                                                        
+                                                        <!-- Quote Content (Hidden by default) -->
+                                                        <div id="quote-content-{{ $comment->id }}" class="hidden">
+                                                            <div class="bg-white border border-gray-300 rounded-md p-3">
+                                                                <p class="text-xs text-gray-600 mb-2">Nội dung trích dẫn:</p>
+                                                                <div class="bg-gray-50 border-l-4 border-blue-400 pl-3 py-2 rounded-r-md">
+                                                                    <p class="text-sm text-gray-700 italic">{{ Str::limit($comment->content, 200) }}</p>
                                                                 </div>
+                                                                <input type="hidden" name="quoted_content" value="{{ Str::limit($comment->content, 200) }}">
                                                             </div>
-                                                        @else
-                                                            <!-- Show message that quoting is not allowed -->
-                                                            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                                                                <div class="flex items-center">
-                                                                    <svg class="w-4 h-4 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                                                    </svg>
-                                                                    <p class="text-sm text-yellow-800">Không thể trích dẫn bình luận đã có trích dẫn</p>
-                                                                </div>
-                                                            </div>
-                                                        @endif
+                                                        </div>
 
                                                         <!-- Reply Content -->
                                                         <div>
