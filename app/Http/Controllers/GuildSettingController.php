@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Guild;
+use App\Services\GuildService;
 
 class GuildSettingController extends Controller
 {
-    public function __construct()
+    protected GuildService $guildService;
+
+    public function __construct(GuildService $guildService)
     {
         $this->middleware('auth');
+        $this->guildService = $guildService;
     }
 
     /**
@@ -60,13 +63,7 @@ class GuildSettingController extends Controller
         ]);
 
         if ($request->hasFile('banner')) {
-            if ($guild->banner && Storage::disk('public')->exists($guild->banner)) {
-                Storage::disk('public')->delete($guild->banner);
-            }
-
-            $path = $request->file('banner')->store('guild-banners', 'public');
-            $guild->update(['banner' => $path]);
-            
+            $this->guildService->updateBanner($guild, $request->file('banner'));
             return redirect()->back()->with('success', 'Cập nhật ảnh bìa thành công!');
         }
 
@@ -93,7 +90,7 @@ class GuildSettingController extends Controller
             'announcement' => 'nullable|string|max:2000',
         ]);
 
-        $guild->update(['announcement' => $request->announcement]);
+        $this->guildService->updateAnnouncement($guild, $request->announcement);
         
         return redirect()->back()->with('success', 'Cập nhật thông báo thành công!');
     }

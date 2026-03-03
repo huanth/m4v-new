@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Guild;
 use App\Models\GuildMember;
+use App\Services\GuildMemberService;
 
 class GuildMemberController extends Controller
 {
-    public function __construct()
+    protected GuildMemberService $guildMemberService;
+
+    public function __construct(GuildMemberService $guildMemberService)
     {
         $this->middleware('auth')->except(['index']);
+        $this->guildMemberService = $guildMemberService;
     }
 
     /**
@@ -27,10 +31,7 @@ class GuildMemberController extends Controller
             $userMembership = $guild->members()->where('user_id', $user->id)->first();
         }
 
-        // Get all members with their roles
         $members = $guild->members()->with('user')->get();
-        
-        // Group members by role
         $membersByRole = $members->groupBy('role');
 
         return view('guilds.members', compact('guild', 'userMembership', 'membersByRole'));
@@ -44,7 +45,6 @@ class GuildMemberController extends Controller
         $guild = Guild::findOrFail($id);
         $user = Auth::user();
 
-        // Check if user can join
         if (!$guild->canUserJoin($user->id)) {
             if ($guild->hasMember($user->id)) {
                 return redirect()->back()->with('error', 'Bạn đã là thành viên của bang hội này rồi.');
@@ -54,12 +54,7 @@ class GuildMemberController extends Controller
             }
         }
 
-        // Add user to guild as member
-        GuildMember::create([
-            'guild_id' => $guild->id,
-            'user_id' => $user->id,
-            'role' => Guild::ROLE_MEMBER,
-        ]);
+        $this->guildMemberService->joinGuild($guild, $user->id);
 
         return redirect()->back()->with('success', 'Gia nhập bang hội thành công!');
     }
@@ -78,12 +73,11 @@ class GuildMemberController extends Controller
             return redirect()->back()->with('error', 'Bạn không phải là thành viên của bang hội này.');
         }
 
-        // Leader cannot leave guild
         if ($membership->isLeader()) {
             return redirect()->back()->with('error', 'Bang chủ không thể rời bang hội. Hãy chuyển quyền bang chủ trước.');
         }
 
-        $membership->delete();
+        $this->guildMemberService->leaveGuild($guild, $user->id);
 
         return redirect()->route('guilds.index')
             ->with('success', 'Rời bang hội thành công!');
@@ -118,12 +112,11 @@ class GuildMemberController extends Controller
             return redirect()->back()->with('error', 'Thành viên không tồn tại.');
         }
 
-        // Cannot change leader role
         if ($member->isLeader()) {
             return redirect()->back()->with('error', 'Không thể thay đổi role của bang chủ.');
         }
 
-        $member->update(['role' => $request->role]);
+        $this->guildMemberService->updateRole($member, $request->role);
 
         return redirect()->back()->with('success', 'Cập nhật role thành công!');
     }

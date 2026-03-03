@@ -6,12 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Guild;
 use App\Models\GuildCategory;
+use App\Services\GuildCategoryService;
 
 class GuildCategoryController extends Controller
 {
-    public function __construct()
+    protected GuildCategoryService $guildCategoryService;
+
+    public function __construct(GuildCategoryService $guildCategoryService)
     {
         $this->middleware('auth');
+        $this->guildCategoryService = $guildCategoryService;
     }
 
     /**
@@ -35,12 +39,7 @@ class GuildCategoryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        GuildCategory::create([
-            'guild_id' => $guild->id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'sort_order' => $guild->categories()->count(),
-        ]);
+        $this->guildCategoryService->createCategory($guild->id, $request->all());
 
         return redirect()->back()->with('success', 'Tạo danh mục thành công!');
     }
@@ -74,10 +73,7 @@ class GuildCategoryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        $category->update([
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        $this->guildCategoryService->updateCategory($category, $request->all());
 
         return redirect()->back()->with('success', 'Cập nhật danh mục thành công!');
     }
@@ -106,7 +102,7 @@ class GuildCategoryController extends Controller
             return redirect()->back()->with('error', 'Danh mục không tồn tại.');
         }
 
-        $category->delete();
+        $this->guildCategoryService->deleteCategory($category);
 
         return redirect()->back()->with('success', 'Xóa danh mục thành công!');
     }
