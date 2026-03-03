@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate; // Added Gate
 use App\Models\Guild;
 use App\Models\GuildCategory;
 use App\Services\GuildCategoryService;
@@ -24,15 +24,8 @@ class GuildCategoryController extends Controller
     public function store(Request $request, $id)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
-        
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        $canManage = $user->isSuperAdmin() || $user->isAdmin();
-        
-        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
-            return redirect()->back()->with('error', 'Bạn không có quyền tạo danh mục.');
-        }
+
+        Gate::authorize('create', [GuildCategory::class, $guild]); // Replaced manual check
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -50,15 +43,8 @@ class GuildCategoryController extends Controller
     public function update(Request $request, $id, $categoryId)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
-        
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        $canManage = $user->isSuperAdmin() || $user->isAdmin();
-        
-        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
-            return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa danh mục.');
-        }
+
+        Gate::authorize('update', [GuildCategory::class, $guild]); // Replaced manual check
 
         $category = GuildCategory::where('id', $categoryId)
             ->where('guild_id', $guild->id)
@@ -84,15 +70,8 @@ class GuildCategoryController extends Controller
     public function destroy($id, $categoryId)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
-        
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        $canManage = $user->isSuperAdmin() || $user->isAdmin();
-        
-        if (!$canManage && (!$userMembership || !$userMembership->canCreateCategories())) {
-            return redirect()->back()->with('error', 'Bạn không có quyền xóa danh mục.');
-        }
+
+        Gate::authorize('delete', [GuildCategory::class, $guild]); // Replaced manual check
 
         $category = GuildCategory::where('id', $categoryId)
             ->where('guild_id', $guild->id)

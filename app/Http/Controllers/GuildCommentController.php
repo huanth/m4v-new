@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Guild;
 use App\Models\GuildPost;
 use App\Models\GuildPostComment;
@@ -25,11 +25,12 @@ class GuildCommentController extends Controller
     public function store(Request $request, $id, $postId)
     {
         $guild = Guild::findOrFail($id);
+        
+        Gate::authorize('create', [GuildPostComment::class, $guild]);
+
         $post = GuildPost::where('id', $postId)
             ->where('guild_id', $guild->id)
             ->firstOrFail();
-
-        $user = Auth::user();
 
         $request->validate([
             'content' => 'required|string|max:2000',
@@ -47,7 +48,7 @@ class GuildCommentController extends Controller
             }
         }
 
-        $this->guildCommentService->createComment($post->id, $user->id, $request->all());
+        $this->guildCommentService->createComment($post->id, auth()->id(), $request->all());
 
         $message = $request->parent_id ? 'Đã trả lời bình luận!' : 'Đã thêm bình luận!';
         return redirect()->back()->with('success', $message);
@@ -67,11 +68,7 @@ class GuildCommentController extends Controller
             ->where('post_id', $post->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$comment->canEdit($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa bình luận này.');
-        }
+        Gate::authorize('update', $comment);
 
         $request->validate([
             'content' => 'required|string|max:2000',
@@ -96,11 +93,7 @@ class GuildCommentController extends Controller
             ->where('post_id', $post->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$comment->canDelete($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền xóa bình luận này.');
-        }
+        Gate::authorize('delete', $comment);
 
         $this->guildCommentService->deleteComment($comment);
 
@@ -121,9 +114,7 @@ class GuildCommentController extends Controller
             ->where('post_id', $post->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-
-        $liked = $this->guildCommentService->toggleLike($comment, $user->id);
+        $liked = $this->guildCommentService->toggleLike($comment, auth()->id());
 
         $message = $liked ? 'Đã thích bình luận!' : 'Đã bỏ thích bình luận!';
         return redirect()->back()->with('success', $message);
