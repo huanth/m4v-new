@@ -27,6 +27,7 @@ Một nền tảng cộng đồng trực tuyến được xây dựng với Lara
 
 ### 📝 Bài viết và Bình luận
 - **Tạo bài viết** trong bang hội với danh mục
+- **Rich Text Editor (TinyMCE)** cho soạn thảo bài viết và bình luận
 - **Bình luận phẳng** - tất cả comment ở cùng cấp
 - **Trích dẫn comment** khi trả lời
 - **Thích** bài viết/bình luận
@@ -42,15 +43,16 @@ Một nền tảng cộng đồng trực tuyến được xây dựng với Lara
 
 ### 🔔 Thông báo thông minh
 - **Thông báo tự động** khi có người thích/bình luận
-- **Link trực tiếp** đến bài viết/comment được tương tác
-- **Đánh dấu đã đọc** thông báo
+- **Click thông báo → tự động đánh dấu đã đọc + redirect** đến bài viết/comment
+- **Đánh dấu đã đọc** thủ công từng thông báo hoặc tất cả
 - **Hiển thị số thông báo** chưa đọc trong header
 - **Thông báo trả lời comment** cho tác giả comment gốc
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Backend**: Laravel 11.x
+- **Backend**: Laravel 12.x
 - **Frontend**: Blade Templates + Tailwind CSS
+- **Rich Text Editor**: TinyMCE 7 (CDN)
 - **Database**: MySQL
 - **Real-time**: Pusher (cho tin nhắn)
 - **File Storage**: Laravel Storage
@@ -147,6 +149,11 @@ PUSHER_APP_ID=your-app-id
 PUSHER_APP_KEY=your-app-key
 PUSHER_APP_SECRET=your-app-secret
 PUSHER_APP_CLUSTER=your-cluster
+
+# TinyMCE Rich Text Editor
+# Lấy API key miễn phí tại: https://www.tiny.cloud/my-account/integrate/
+TINYMCE_API_KEY=your-tinymce-api-key
+VITE_TINYMCE_API_KEY=your-tinymce-api-key
 
 # File Storage
 FILESYSTEM_DISK=local
@@ -489,16 +496,20 @@ PUSHER_APP_SECRET=your-app-secret
 PUSHER_APP_CLUSTER=your-cluster
 ```
 
-## 👥 Tài khoản mặc định
+## 👥 Tài khoản
 
-Sau khi chạy seeder, bạn có thể đăng nhập với:
-- **Super Admin**: `admin` / `password`
-- **Admin**: `admin2` / `password`
-- **User thường**: `user` / `password`
+- **Super Admin tự động**: Tài khoản **đầu tiên** được đăng ký sẽ tự động nhận role `SADMIN`
+- Các tài khoản tiếp theo mặc định role `user`
 
 ## 🔄 Changelog
 
-### Version 2.0 (Latest)
+### Version 3.0 (Latest)
+- ✏️ **TinyMCE Rich Text Editor** tích hợp vào bài viết và bình luận
+- 🔔 **Fix notification redirect**: Click thông báo → mark-as-read + redirect đúng URL
+- 👑 **Auto SADMIN**: Tài khoản đầu tiên đăng ký nhận quyền Super Admin
+- 🐛 **Fix related_type**: Chuẩn hóa FQN cho morphTo notification
+
+### Version 2.0
 - ✨ **Trang chủ thông minh** với bài viết mới nhất và bang hội nổi bật
 - 🧠 **Thuật toán sắp xếp thông minh** ưu tiên bài viết mới và có tương tác
 - 💬 **Bình luận phẳng** với trích dẫn và phân trang
@@ -600,6 +611,7 @@ routes/
 
 ### Notifications
 - `GET /notifications` - Danh sách thông báo
+- `GET /notifications/{id}/redirect` - Click thông báo: mark-as-read + redirect
 - `POST /notifications/{id}/mark-read` - Đánh dấu đã đọc
 - `POST /notifications/mark-all-read` - Đánh dấu tất cả đã đọc
 

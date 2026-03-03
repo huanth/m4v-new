@@ -101,8 +101,10 @@
 
             <!-- Post Content -->
             <div class="py-6">
-                <div class="prose max-w-none">
-                    {!! nl2br(e($post->content)) !!}
+                <div class="prose prose-sm max-w-none
+                            prose-headings:text-gray-900 prose-a:text-blue-600
+                            prose-img:rounded-lg prose-pre:bg-gray-900">
+                    {!! $post->content !!}
                 </div>
             </div>
         </div>
@@ -221,7 +223,7 @@
                         @csrf
                         <div class="space-y-4">
                             <div>
-                                <textarea name="content" rows="3" required 
+                                <textarea id="commentContent" name="content" rows="3" required data-tinymce-comment
                                           class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('content') border-red-500 focus:ring-red-500 @enderror" 
                                           placeholder="Viết bình luận của bạn..."></textarea>
                                 @error('content')
@@ -390,7 +392,11 @@
                                                         <p class="text-sm text-gray-700 italic">{{ Str::limit($comment->quoted_content, 150) }}</p>
                                                     </div>
                                                 @endif
-                                                <p class="text-sm text-gray-800 leading-relaxed" id="comment-content-{{ $comment->id }}">{{ $comment->content }}</p>
+                                                <div class="text-sm text-gray-800 leading-relaxed prose prose-sm max-w-none
+                                                            prose-a:text-blue-600 prose-img:rounded-md"
+                                                     id="comment-content-{{ $comment->id }}">
+                                                    {!! $comment->content !!}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -420,7 +426,7 @@
 
                                                         <!-- Reply Content -->
                                                         <div>
-                                                            <textarea name="content" rows="3" required 
+                                                            <textarea name="content" rows="3" required data-tinymce-comment
                                                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('content') border-red-500 focus:ring-red-500 @enderror" 
                                                                       placeholder="Trả lời {{ $comment->user->username }}..."></textarea>
                                                             @error('content')
@@ -480,7 +486,7 @@
                 @method('PUT')
                 <div class="space-y-4">
                     <div>
-                        <textarea id="editCommentContent" name="content" rows="3" required 
+                        <textarea id="editCommentContent" name="content" rows="3" required data-tinymce-comment
                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                     <div class="flex space-x-2">
@@ -499,7 +505,12 @@
 
 <script>
 function editComment(commentId, content) {
-    document.getElementById('editCommentContent').value = content;
+    const editor = tinymce.get('editCommentContent');
+    if (editor) {
+        editor.setContent(content);
+    } else {
+        document.getElementById('editCommentContent').value = content;
+    }
     document.getElementById('editCommentForm').action = '{{ route("guilds.posts.comments.update", [$guild->id, $post->id, ":commentId"]) }}'.replace(':commentId', commentId);
     document.getElementById('editCommentModal').classList.remove('hidden');
 }
@@ -567,4 +578,38 @@ function quoteComment(commentId) {
     }, 100);
 }
 </script>
+
+@push('scripts')
+<script src="https://cdn.tiny.cloud/1/{{ env('TINYMCE_API_KEY') }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+    selector: 'textarea[data-tinymce-comment]',
+    height: 180,
+    menubar: false,
+    branding: false,
+    promotion: false,
+    statusbar: false,
+    plugins: ['autolink', 'lists', 'link', 'emoticons'],
+    toolbar: 'bold italic underline | bullist numlist | link emoticons',
+    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-size: 14px; line-height: 1.5; color: #1f2937; }',
+    setup(editor) {
+        editor.on('change', () => editor.save());
+
+        // When reply form is toggled open, refresh the editor layout
+        editor.on('init', function() {
+            const ta = editor.getElement();
+            if (ta && ta.closest('.hidden')) {
+                const observer = new MutationObserver(() => {
+                    if (!ta.closest('.hidden')) {
+                        editor.execCommand('mceFocus');
+                        observer.disconnect();
+                    }
+                });
+                observer.observe(ta.closest('[id^="reply-form-"]') || document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+            }
+        });
+    },
+});
+</script>
+@endpush
 @endsection

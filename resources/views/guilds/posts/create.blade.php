@@ -81,7 +81,7 @@
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
                         Nội dung bài viết <span class="text-red-500">*</span>
                     </label>
-                    <textarea id="content" name="content" rows="12" required 
+                    <textarea id="content" name="content" rows="12" required data-tinymce
                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('content') border-red-500 focus:ring-red-500 @enderror" 
                               placeholder="Nhập nội dung bài viết...">{{ old('content') }}</textarea>
                     @error('content')
@@ -136,16 +136,29 @@
     </div>
 </div>
 
+@push('scripts')
+<script src="https://cdn.tiny.cloud/1/{{ env('TINYMCE_API_KEY') }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-// Character counter
-document.getElementById('content').addEventListener('input', function() {
-    const charCount = this.value.length;
-    document.getElementById('charCount').textContent = charCount;
-    
-    if (charCount > 10000) {
-        this.value = this.value.substring(0, 10000);
-        document.getElementById('charCount').textContent = '10000';
-    }
+tinymce.init({
+    selector: 'textarea[data-tinymce]',
+    height: 480,
+    menubar: false,
+    branding: false,
+    promotion: false,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+        'searchreplace', 'code', 'fullscreen', 'media', 'table', 'wordcount',
+    ],
+    toolbar:
+        'undo redo | formatselect | bold italic underline strikethrough | ' +
+        'forecolor backcolor | alignleft aligncenter alignright alignjustify | ' +
+        'bullist numlist outdent indent | link image media table | ' +
+        'code fullscreen',
+    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; font-size: 15px; line-height: 1.6; color: #1f2937; }',
+    setup(editor) {
+        editor.on('change', () => editor.save());
+    },
 });
 </script>
+@endpush
 @endsection

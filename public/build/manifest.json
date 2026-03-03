@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-0Dd_vtJd.css",
+    "file": "assets/app-I9Oq6xlA.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -12,5 +12,14 @@
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true
+  },
+  "resources/js/tinymce-editor.js": {
+    "file": "assets/tinymce-editor-CFUeFeVk.js",
+    "name": "tinymce-editor",
+    "src": "resources/js/tinymce-editor.js",
+    "isEntry": true,
+    "css": [
+      "assets/tinymce-editor-CbySn103.css"
+    ]
   }
 }
