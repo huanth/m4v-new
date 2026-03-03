@@ -1,820 +1,214 @@
-# M4V.ME - Cộng đồng đích thực
+# M4V.ME - Cộng Đồng Đích Thực
 
-Một nền tảng cộng đồng trực tuyến được xây dựng với Laravel, cung cấp các tính năng tương tác xã hội như bang hội, tin nhắn, thông báo và quản lý người dùng.
+Một nền tảng cộng đồng trực tuyến được xây dựng với **Laravel**, hỗ trợ các tiện ích tương tác chuyên sâu như hệ thống Bang hội, Nhắn tin theo thời gian thực (Real-time), Thông báo đẩy và Quản trị người dùng toàn diện.
 
-## 🚀 Tính năng chính
+## 🚀 Tính Năng Nổi Bật
 
-### 👥 Quản lý người dùng
-- **Đăng ký/Đăng nhập** với username và email
-- **Hệ thống phân quyền** (Super Admin, Admin, SMod, FMod, User)
-- **Quản lý avatar** người dùng
-- **Hệ thống ban** với lý do, thời gian và loại ban
-- **Profile công khai** tại `/user/{id}`
+### 👥 Quản Lý Người Dùng
+- **Đăng ký/Đăng nhập**: Hỗ trợ tài khoản và mật khẩu, xác thực qua email (tuỳ chọn).
+- **Hệ thống phân quyền (Roles)**: Cung cấp đầy đủ các cấp bậc từ Super Admin, Admin, SMod, FMod cho đến User bình thường.
+- **Tùy chỉnh Hồ sơ (Profile)**: Quản lý ảnh đại diện, xem nhật ký hoạt động, số liệu thống kê cá nhân `/user/{id}`.
+- **Kiểm soát vi phạm (Ban system)**: Cấm tài khoản có thời hạn/vô thời hạn kèm lý do cụ thể.
 
-### 🏠 Trang chủ thông minh
-- **Hiển thị bài viết mới nhất** từ tất cả bang hội
-- **Sắp xếp thông minh**: Ưu tiên bài viết mới và có tương tác
-- **Bang hội nổi bật** theo số lượng thành viên
-- **Responsive design** cho mọi thiết bị
+### 🏠 Trang Chủ Thông Minh
+- **Nguồn cấp dữ liệu (Feed)**: Tổng hợp bài viết mới nhất từ tất cả các bang hội.
+- **Thuật toán sắp xếp**: Tự động đưa các chủ đề nóng và mới lên đầu tiên.
+- **Bảng xếp hạng**: Hiển thị danh sách Bang hội có quy mô lớn nhất.
+- **Phản hồi (Responsive)**: Giao diện thích ứng tốt trên cả máy tính lẫn điện thoại.
 
-### 🏰 Bang hội (Guilds)
-- **Tạo và quản lý bang hội** (chỉ Super Admin và Admin)
-- **Hệ thống thành viên** với các vai trò: Bang chủ, Phó bang, Trưởng lão, Thành viên
-- **Quản lý danh mục** bài viết trong bang hội
-- **Banner và thông báo** bang hội
-- **Truy cập công khai** - ai cũng có thể xem bang hội
-- **Super Admin & Admin** có toàn quyền quản lý tất cả bang hội
+### 🏰 Hệ Thống Bang Hội (Guilds)
+- **Kiểm soát & Quản lý**: Quyền khởi tạo bang hội nằm trong tay Quản trị viên (Super Admin / Admin).
+- **Phân cấp Tổ chức**: Bao gồm Bang chủ, Phó bang, Trưởng lão, Thành viên.
+- **Khu vực thảo luận**: Chia nhỏ bang hội thành nhiều danh mục để dễ quản lý.
+- **Truyền thông nội bộ**: Cài đặt ảnh bìa và ghim thông báo toàn bang.
+- **Tính mở**: Khách vãng lai cũng có thể dạo xem các bài viết công khai.
 
-### 📝 Bài viết và Bình luận
-- **Tạo bài viết** trong bang hội với danh mục
-- **Rich Text Editor (TinyMCE)** cho soạn thảo bài viết và bình luận
-- **Bình luận phẳng** - tất cả comment ở cùng cấp
-- **Trích dẫn comment** khi trả lời
-- **Thích** bài viết/bình luận
-- **Ghim và khóa** bài viết (dành cho quản trị viên)
-- **Đếm lượt xem** bài viết
-- **Phân trang comment** (10 comment/trang)
-- **Sắp xếp thông minh**: Ưu tiên bài viết mới và có tương tác
+### 📝 Thảo Luận & Tương Tác
+- **Trình soạn thảo văn bản phong phú (Rich Text)**: Tích hợp TinyMCE 7 cho trải nghiệm viết hoàn hảo.
+- **Cơ chế bình luận**: Bình luận tuyến tính (phẳng), hỗ trợ tính năng trích dẫn nội dung (Quote).
+- **Thể hiện cảm xúc**: Thích bài viết hoặc bình luận.
+- **Công cụ điều phối**: Quản trị viên có thể ghim (Pin) và khóa (Lock) các bài viết sai phạm.
+- **Theo dõi chỉ số**: Đếm lượt xem, phân trang nội dung (10 phản hồi/trang).
 
-### 💬 Tin nhắn
-- **Tin nhắn real-time** giữa các người dùng
-- **Hiển thị số cuộc trò chuyện** chưa đọc
-- **Giao diện chat** thân thiện
+### 💬 Trò Chuyện Trực Tuyến
+- **Tin nhắn thời gian thực**: Sử dụng WebSockets đem lại tốc độ nhắn tin tức thì.
+- **Quản lý cuộc gọi**: Đếm số tin nhắn chưa đọc, hiển thị danh sách thân thiện.
 
-### 🔔 Thông báo thông minh
-- **Thông báo tự động** khi có người thích/bình luận
-- **Click thông báo → tự động đánh dấu đã đọc + redirect** đến bài viết/comment
-- **Đánh dấu đã đọc** thủ công từng thông báo hoặc tất cả
-- **Hiển thị số thông báo** chưa đọc trong header
-- **Thông báo trả lời comment** cho tác giả comment gốc
+### 🔔 Thông Báo Đẩy (Notifications)
+- **Tự động hóa**: Bạn sẽ nhận được thông báo ngay khi có ai đó thích/trả lời bình luận của bạn.
+- **Điều hướng thông minh**: Click vào thông báo sẽ tự động xử lý trạng thái "Đã đọc" và đưa người dùng đến đúng bài viết đó.
 
-## 🛠️ Công nghệ sử dụng
+---
+
+## 🛠️ Công Nghệ Chức Năng
 
 - **Backend**: Laravel 12.x
 - **Frontend**: Blade Templates + Tailwind CSS
-- **Rich Text Editor**: TinyMCE 7 (CDN)
-- **Database**: MySQL
-- **Real-time**: Pusher (cho tin nhắn)
-- **File Storage**: Laravel Storage
-- **Authentication**: Laravel Auth
+- **Trình soạn thảo**: TinyMCE 7 (CDN)
+- **Hệ cơ sở dữ liệu**: MySQL / MariaDB
+- **Xử lý thời gian thực**: Pusher
+- **Lưu trữ tĩnh (Storage)**: Laravel Storage
+- **Định danh (Auth)**: Laravel Session/Auth
 
-## 📋 Yêu cầu hệ thống
+---
 
-- PHP >= 8.1
-- Composer
-- MySQL >= 5.7
-- Node.js & NPM
-- Laravel Sail (tùy chọn)
+## 📋 Yêu Cầu Môi Trường (System Requirements)
 
-## 🚀 Cài đặt
-
-### 📋 Yêu cầu hệ thống
 - **PHP**: >= 8.1
-- **Composer**: Latest version
+- **Composer**: Phiên bản mới nhất
 - **Node.js**: >= 16.x & NPM
-- **MySQL**: >= 5.7 hoặc MariaDB >= 10.2
-- **Web Server**: Apache/Nginx
-- **SSL Certificate**: (Khuyến nghị cho production)
+- **Database**: MySQL >= 5.7 hoặc MariaDB >= 10.2
+- **Web Server**: NGINX hoặc Apache
 
-### 🖥️ Cài đặt trên Server (Production)
+---
 
-#### 1. Clone repository
+## 🚀 Hướng Dẫn Cài Đặt (Server / Production)
+
+### 1. Tải Mã Nguồn
 ```bash
-git clone https://github.com/your-username/m4v-clone.git
-cd m4v-clone
+git clone https://github.com/huanth/m4v-new.git
+cd m4v-new
 ```
 
-#### 2. Cài đặt dependencies
+### 2. Cài Đặt Thư Viện
 ```bash
 # Cài đặt PHP dependencies
 composer install --optimize-autoloader --no-dev
 
-# Cài đặt Node.js dependencies
+# Cài đặt Javascript/CSS dependencies
 npm install
 
-# Build assets cho production
+# Biên dịch assets tĩnh
 npm run build
 ```
 
-#### 3. Cấu hình môi trường
+### 3. Cấu Hình Biến Môi Trường
 ```bash
-# Copy file environment
 cp .env.example .env
 
-# Generate application key
+# Sinh khóa bảo mật mới
 php artisan key:generate
 
-# Chỉnh sửa file .env cho production
+# Mở file .env để sửa các thông số kết nối Database
 nano .env
 ```
 
-#### 4. Cấu hình .env cho Production
+*Trong file `.env`, vui lòng cập nhật:*
 ```env
 APP_NAME="M4V.ME"
 APP_ENV=production
-APP_KEY=base64:your-generated-key
 APP_DEBUG=false
 APP_URL=https://yourdomain.com
 
-# Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=m4v_production
 DB_USERNAME=your_db_user
 DB_PASSWORD=your_secure_password
-
-# Cache & Session
-CACHE_DRIVER=redis
-SESSION_DRIVER=redis
-QUEUE_CONNECTION=redis
-
-# Redis (Khuyến nghị cho production)
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-# Mail (SMTP)
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=noreply@yourdomain.com
-MAIL_FROM_NAME="${APP_NAME}"
-
-# Pusher (Real-time)
-PUSHER_APP_ID=your-app-id
-PUSHER_APP_KEY=your-app-key
-PUSHER_APP_SECRET=your-app-secret
-PUSHER_APP_CLUSTER=your-cluster
-
-# TinyMCE Rich Text Editor
-# Lấy API key miễn phí tại: https://www.tiny.cloud/my-account/integrate/
-TINYMCE_API_KEY=your-tinymce-api-key
-VITE_TINYMCE_API_KEY=your-tinymce-api-key
-
-# File Storage
-FILESYSTEM_DISK=local
 ```
 
-#### 5. Tạo database và user
-```sql
--- Đăng nhập MySQL
-mysql -u root -p
-
--- Tạo database
-CREATE DATABASE m4v_production CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Tạo user
-CREATE USER 'm4v_user'@'localhost' IDENTIFIED BY 'strong_password_here';
-
--- Cấp quyền
-GRANT ALL PRIVILEGES ON m4v_production.* TO 'm4v_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-#### 6. Chạy migrations và seeder
+### 4. Thiết Lập Khởi Tạo (Database Migrations)
 ```bash
-# Chạy migrations
+# Chạy tệp lệnh DB (Migrations)
 php artisan migrate --force
 
-# Chạy seeder (tạo tài khoản admin mặc định)
+# Đổ dữ liệu hạt giống (Seed) để có tài khoản admin mặc định.
 php artisan db:seed --force
 ```
 
-#### 7. Cấu hình storage và permissions
+### 5. Cấp Quyền Truy Cập (Permissions & Storage)
 ```bash
-# Tạo symbolic link cho storage
+# Tạo liên kết tượng trưng (Symlink) cho Storage
 php artisan storage:link
 
-# Set permissions
+# Trao quyền sở hữu cho Web Server (VD: www-data của Nginx/Apache)
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
 sudo chmod -R 755 public
 ```
 
-#### 8. Tối ưu hóa cho Production
+### 6. Tối Ưu Tốc Độ Xử Lý
 ```bash
-# Cache configuration
 php artisan config:cache
-
-# Cache routes
-php artisan route:cache
-
-# Cache views
 php artisan view:cache
+# Nếu source-code không dùng Closure cho Route thì có thể chạy lệnh dưới
+# php artisan route:cache
 
-# Optimize autoloader
 composer dump-autoload --optimize
 ```
 
-### 🌐 Cấu hình Web Server
+---
 
-#### Nginx Configuration
-```nginx
-server {
-    listen 80;
-    listen 443 ssl http2;
-    server_name yourdomain.com www.yourdomain.com;
-    root /path/to/m4v-clone/public;
-    
-    # SSL Configuration
-    ssl_certificate /path/to/ssl/cert.pem;
-    ssl_certificate_key /path/to/ssl/private.key;
-    
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-    
-    index index.php;
-    
-    charset utf-8;
-    
-    # Handle Laravel routes
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-    
-    # PHP handling
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-    
-    # Deny access to hidden files
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-    
-    # Security headers
-    add_header X-XSS-Protection "1; mode=block";
-    add_header Referrer-Policy "strict-origin-when-cross-origin";
-}
-```
+## 🔧 Hướng Dẫn Chạy Môi Trường Cục Bộ (Local Development)
 
-#### Apache Configuration (.htaccess)
-```apache
-# File: public/.htaccess
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
-    RewriteEngine On
-
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
-
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-</IfModule>
-```
-
-### 🔧 Cài đặt trên Local Development
-
-#### 1. Clone và setup
 ```bash
-git clone https://github.com/your-username/m4v-clone.git
-cd m4v-clone
-```
+# Lấy code và truy cập thư mục
+git clone https://github.com/huanth/m4v-new.git
+cd m4v-new
 
-#### 2. Cài đặt dependencies
-```bash
+# Cài packages
 composer install
 npm install
-```
 
-#### 3. Cấu hình environment
-```bash
+# Khởi tạo db, .env
 cp .env.example .env
 php artisan key:generate
-```
 
-#### 4. Cấu hình .env cho Development
-```env
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost:8000
-
-# Database local
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=m4v_local
-DB_USERNAME=root
-DB_PASSWORD=
-
-# Queue sync cho development
-QUEUE_CONNECTION=sync
-```
-
-#### 5. Setup database
-```bash
-# Tạo database local
-mysql -u root -p
-CREATE DATABASE m4v_local CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# Chạy migrations
+# Dựng CSDL
 php artisan migrate
 php artisan db:seed
-
-# Tạo storage link
 php artisan storage:link
-```
 
-#### 6. Chạy development server
-```bash
-# Build assets
-npm run dev
-
-# Chạy Laravel server
+# Khởi chạy server
 php artisan serve
 
-# Hoặc chạy Vite dev server
+# Build hoặc theo dõi sự thay đổi CSS/JS trên terminal thứ 2
 npm run dev
 ```
-
-### 🐳 Docker Deployment (Tùy chọn)
-
-#### docker-compose.yml
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: m4v-app
-    restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
-    networks:
-      - m4v-network
-
-  nginx:
-    image: nginx:alpine
-    container_name: m4v-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./:/var/www
-      - ./docker/nginx:/etc/nginx/conf.d
-    networks:
-      - m4v-network
-
-  mysql:
-    image: mysql:8.0
-    container_name: m4v-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: m4v_production
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_USER: m4v_user
-      MYSQL_PASSWORD: user_password
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - m4v-network
-
-  redis:
-    image: redis:alpine
-    container_name: m4v-redis
-    restart: unless-stopped
-    networks:
-      - m4v-network
-
-volumes:
-  mysql_data:
-    driver: local
-
-networks:
-  m4v-network:
-    driver: bridge
-```
-
-### 🔄 Scripts tự động hóa
-
-#### deploy.sh (Production)
-```bash
-#!/bin/bash
-
-echo "🚀 Deploying M4V.ME..."
-
-# Pull latest code
-git pull origin main
-
-# Install/Update dependencies
-composer install --optimize-autoloader --no-dev
-npm install
-npm run build
-
-# Run migrations
-php artisan migrate --force
-
-# Clear and cache
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Set permissions
-sudo chown -R www-data:www-data storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
-
-echo "✅ Deployment completed!"
-```
-
-#### setup.sh (First time setup)
-```bash
-#!/bin/bash
-
-echo "🔧 Setting up M4V.ME for the first time..."
-
-# Copy environment file
-cp .env.example .env
-
-# Install dependencies
-composer install
-npm install
-
-# Generate key
-php artisan key:generate
-
-# Build assets
-npm run build
-
-# Run migrations and seed
-php artisan migrate --force
-php artisan db:seed --force
-
-# Create storage link
-php artisan storage:link
-
-# Set permissions
-sudo chown -R www-data:www-data storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
-
-echo "✅ Setup completed!"
-echo "🌐 Visit your site at: http://your-domain.com"
-echo "👤 Login with: admin / password"
-```
-
-## 🔧 Cấu hình bổ sung
-
-### SMTP (Email)
-Cấu hình trong `.env`:
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-MAIL_ENCRYPTION=tls
-```
-
-### Pusher (Real-time messaging)
-Cấu hình trong `.env`:
-```env
-PUSHER_APP_ID=your-app-id
-PUSHER_APP_KEY=your-app-key
-PUSHER_APP_SECRET=your-app-secret
-PUSHER_APP_CLUSTER=your-cluster
-```
-
-## 👥 Tài khoản
-
-- **Super Admin tự động**: Tài khoản **đầu tiên** được đăng ký sẽ tự động nhận role `SADMIN`
-- Các tài khoản tiếp theo mặc định role `user`
-
-## 🔄 Changelog
-
-### Version 3.0 (Latest)
-- ✏️ **TinyMCE Rich Text Editor** tích hợp vào bài viết và bình luận
-- 🔔 **Fix notification redirect**: Click thông báo → mark-as-read + redirect đúng URL
-- 👑 **Auto SADMIN**: Tài khoản đầu tiên đăng ký nhận quyền Super Admin
-- 🐛 **Fix related_type**: Chuẩn hóa FQN cho morphTo notification
-
-### Version 2.0
-- ✨ **Trang chủ thông minh** với bài viết mới nhất và bang hội nổi bật
-- 🧠 **Thuật toán sắp xếp thông minh** ưu tiên bài viết mới và có tương tác
-- 💬 **Bình luận phẳng** với trích dẫn và phân trang
-- 🔗 **Thông báo có link** trực tiếp đến nội dung
-- 📱 **Responsive design** hoàn toàn cho mobile và desktop
-- 🔒 **Phân quyền nâng cao** cho Super Admin và Admin
-- ⚡ **Performance optimization** với subquery và eager loading
-
-### Version 1.0
-- 🏰 Hệ thống bang hội cơ bản
-- 👥 Quản lý người dùng và phân quyền
-- 📝 Bài viết và bình luận
-- 💬 Tin nhắn real-time
-- 🔔 Hệ thống thông báo
-
-## 📁 Cấu trúc dự án
-
-```
-app/
-├── Http/Controllers/          # Controllers
-│   ├── Auth/                 # Authentication controllers
-│   ├── Admin/                # Admin controllers
-│   └── ...
-├── Models/                   # Eloquent models
-├── Services/                 # Business logic services
-└── ...
-
-database/
-├── migrations/               # Database migrations
-├── seeders/                  # Database seeders
-└── factories/                # Model factories
-
-resources/
-├── views/                    # Blade templates
-│   ├── components/           # Reusable components
-│   ├── guilds/              # Guild-related views
-│   ├── notifications/       # Notification views
-│   └── ...
-├── css/                     # Stylesheets
-└── js/                      # JavaScript files
-
-routes/
-└── web.php                  # Web routes
-```
-
-## 🎯 Tính năng nâng cao
-
-### 🧠 Thuật toán sắp xếp thông minh
-- **Priority 1**: Bài viết có tương tác + mới (trong 24h) = **Hot Posts**
-- **Priority 2**: Bài viết siêu mới (trong 2h) = **Fresh Posts**  
-- **Priority 3**: Bài viết có tương tác = **Active Posts**
-- **Priority 4**: Bài viết khác = **Other Posts**
-
-### 🔒 Hệ thống phân quyền
-- **Super Admin**: Toàn quyền hệ thống + quản lý tất cả bang hội
-- **Admin**: Quản lý bang hội + quyền xóa/sửa comment
-- **Guild Roles**: Leader, Vice Leader, Elder có quyền quản lý bang hội
-- **Member**: Tham gia bang hội, tạo bài viết, bình luận
-
-### 📱 Responsive Design
-- **Mobile-first** approach với Tailwind CSS
-- **Header responsive** tự động điều chỉnh theo màn hình
-- **Comment section** tối ưu cho mobile và desktop
-- **Grid layout** linh hoạt cho các thiết bị khác nhau
-
-### 🚀 Performance Optimization
-- **Eager loading** cho relationships
-- **Subquery optimization** cho việc đếm likes/comments
-- **Cache management** cho hoạt động real-time
-- **Pagination** cho comments (10/trang)
-
-## 🎯 API Endpoints
-
-### Authentication
-- `POST /login` - Đăng nhập
-- `POST /register` - Đăng ký  
-- `POST /logout` - Đăng xuất
-
-### Home
-- `GET /` - Trang chủ với bài viết mới nhất
-
-### Guilds
-- `GET /guilds` - Danh sách bang hội
-- `GET /guilds/{id}` - Xem bang hội
-- `GET /guilds/{id}/posts/{postId}` - Xem bài viết chi tiết
-- `POST /guilds/{id}/join` - Tham gia bang hội
-- `POST /guilds/{id}/leave` - Rời bang hội
-- `POST /guilds/{id}/posts` - Tạo bài viết mới
-
-### Comments & Interactions
-- `POST /guilds/{id}/posts/{postId}/comments` - Thêm bình luận
-- `POST /guilds/{id}/posts/{postId}/like` - Thích/bỏ thích bài viết
-- `POST /guilds/{id}/posts/{postId}/comments/{commentId}/like` - Thích/bỏ thích comment
-
-### User Profile
-- `GET /user/{id}` - Xem profile công khai
-- `GET /user/profile` - Profile cá nhân
-- `GET /user/{user}/admin/ban-history` - Lịch sử ban (Admin only)
-
-### Notifications
-- `GET /notifications` - Danh sách thông báo
-- `GET /notifications/{id}/redirect` - Click thông báo: mark-as-read + redirect
-- `POST /notifications/{id}/mark-read` - Đánh dấu đã đọc
-- `POST /notifications/mark-all-read` - Đánh dấu tất cả đã đọc
-
-## 🤝 Đóng góp
-
-1. Fork dự án
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
-
-## 📄 License
-
-Dự án này được phân phối dưới MIT License. Xem file `LICENSE` để biết thêm chi tiết.
-
-## 🔧 Troubleshooting
-
-### ❌ Lỗi thường gặp
-
-#### 1. Permission denied errors
-```bash
-# Fix permissions
-sudo chown -R www-data:www-data storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
-sudo chmod -R 755 public
-```
-
-#### 2. Database connection errors
-```bash
-# Check database service
-sudo systemctl status mysql
-
-# Test connection
-php artisan tinker
-DB::connection()->getPdo();
-```
-
-#### 3. Storage link errors
-```bash
-# Remove existing link and recreate
-rm public/storage
-php artisan storage:link
-```
-
-#### 4. Cache issues
-```bash
-# Clear all caches
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-
-# Rebuild caches
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
-
-#### 5. Composer/Node issues
-```bash
-# Clear composer cache
-composer clear-cache
-composer install --no-cache
-
-# Clear npm cache
-npm cache clean --force
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### 🔍 Debug Commands
-
-```bash
-# Check Laravel configuration
-php artisan config:show
-
-# Check database migrations status
-php artisan migrate:status
-
-# Check routes
-php artisan route:list
-
-# Check queue status
-php artisan queue:work --verbose
-
-# Check storage link
-ls -la public/storage
-```
-
-### 📊 Performance Monitoring
-
-```bash
-# Check application performance
-php artisan about
-
-# Monitor database queries
-# Add DB::enableQueryLog() in code
-# Use DB::getQueryLog() to see queries
-
-# Check memory usage
-php -i | grep memory_limit
-```
-
-## 🛡️ Security Best Practices
-
-### 🔒 Server Security
-- **SSL Certificate**: Luôn sử dụng HTTPS
-- **Firewall**: Chỉ mở ports cần thiết (80, 443, 22)
-- **Regular Updates**: Cập nhật PHP, MySQL, server OS
-- **Backup**: Tự động backup database và files
-
-### 🔐 Application Security
-- **Environment Variables**: Không commit .env file
-- **Strong Passwords**: Sử dụng mật khẩu mạnh cho database
-- **Input Validation**: Validate tất cả user input
-- **CSRF Protection**: Laravel tự động enable
-- **SQL Injection**: Sử dụng Eloquent ORM
-
-### 📁 File Permissions
-```bash
-# Secure file permissions
-find storage -type f -exec chmod 664 {} \;
-find storage -type d -exec chmod 775 {} \;
-find bootstrap/cache -type f -exec chmod 664 {} \;
-find bootstrap/cache -type d -exec chmod 775 {} \;
-```
-
-## 🚀 Production Checklist
-
-### ✅ Pre-deployment
-- [ ] Set `APP_ENV=production`
-- [ ] Set `APP_DEBUG=false`
-- [ ] Configure production database
-- [ ] Setup SSL certificate
-- [ ] Configure email settings
-- [ ] Setup Redis/Memcached
-- [ ] Configure file storage
-- [ ] Setup monitoring/logging
-
-### ✅ Post-deployment
-- [ ] Test all major features
-- [ ] Check database connections
-- [ ] Verify email functionality
-- [ ] Test file uploads
-- [ ] Check real-time features
-- [ ] Monitor performance
-- [ ] Setup automated backups
-- [ ] Configure error monitoring
-
-### 📈 Performance Optimization
-
-#### Database
-```sql
--- Add indexes for better performance
-ALTER TABLE guild_posts ADD INDEX idx_created_at (created_at);
-ALTER TABLE guild_post_comments ADD INDEX idx_post_id (post_id);
-ALTER TABLE guild_post_likes ADD INDEX idx_post_id (post_id);
-```
-
-#### PHP Configuration
-```ini
-; php.ini optimizations
-memory_limit = 256M
-max_execution_time = 300
-upload_max_filesize = 10M
-post_max_size = 10M
-opcache.enable = 1
-opcache.memory_consumption = 128
-```
-
-#### Web Server
-```nginx
-# Nginx optimizations
-gzip on;
-gzip_types text/css application/javascript application/json;
-
-# Cache static files
-location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
-```
-
-## 📞 Support & Community
-
-### 🆘 Getting Help
-- **Documentation**: Check this README first
-- **Issues**: Create GitHub issue for bugs
-- **Discussions**: Use GitHub Discussions for questions
-
-### 🤝 Contributing
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
-### 📧 Contact
-- **Email**: nauhyuh@gmail.com
-- **GitHub**: https://github.com/huanth/m4v-new
 
 ---
 
-**M4V.ME** - Nơi kết nối cộng đồng đích thực! 🎉
+## 🔄 Cấu Hình Deployment Tự Động
+Hệ thống có cung cấp sẵn một Script `deploy.sh` theo chuẩn quy trình tự động.
+Mỗi khi có code mới trên Git, bạn có thể thực thi để update Server:
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
 
-*Built with ❤️ using Laravel & Tailwind CSS*
+---
+
+## 🗂️ Cấu Trúc Dự Án (Project Structure)
+Với mục tiêu mở rộng dài hạn, dự án sử dụng kiến trúc Service Layer/Repository để Clean Code:
+- **`app/Http/Controllers/`**: Điều phối luồng và trả kết quả HTTP (Đã được làm mỏng, chuyên biệt hoá).
+- **`app/Services/`**: Nơi chứa toàn bộ cốt lõi Logic và Thuật toán chức năng chuyên sâu (VD: `GuildService`, `GuildMemberService`).
+- **`app/Policies/`**: Kiểm soát phân quyền tinh vi, ngăn chặn các hành vi vi phạm an ninh hệ thống.
+- **`resources/views/`**: Thiết kế giao diện (Blade Template).
+
+---
+
+## 🎯 Tối Ưu Hiệu Năng (Performance Optimization)
+- **Eager Loading**: Tránh lỗi N+1 Queries khi trích xuất danh sách bài viết/bình luận ra màn hình.
+- **Gộp Index Data**: Sử dụng Index trong CSDL cho các bảng nặng (Ví dụ: Likes, Comments) để lướt Web với độ trễ thấp nhất.
+- **Bộ Nhớ Đệm**: Ứng dụng Redis Cache hoặc Opcache tăng tốc PHP.
+
+---
+
+## 🛡️ Best Practices về Bảo Mật
+
+1. Không bao giờ vô tình đưa file `.env` lên Github.
+2. Vận hành qua HTTPS giao tiếp SSL/TLS là yêu cầu bắt buộc khi mở cổng mạng trên máy chủ Internet.
+3. Hạn chế việc phân quyền tài khoản (Chỉ nên gán Role Admin/Super Admin cho nhóm nhân sự quan trọng).
+4. Xác định và rà soát mọi truy vấn đầu vào thông qua **Laravel Form Requests** / **Validator**.
+
+---
+
+## 📞 Hỗ Trợ và Khắc Phục Sự Cố
+
+- Nếu bạn gặp lỗi như: `Permission denied`, hãy chắc chắn bạn đã chạy lại khối lệnh trao quyền sở hữu (chown) cho thư mục `storage/`.
+- Nếu lỗi trang xuất hiện màn hình trắng hoặc HTTP 500, xem chi tiết nguyên nhân ở `/storage/logs/laravel.log`.
+- Lỗi hình ảnh không hiển thị: Bạn có thể quên thực thi lệnh `php artisan storage:link` để hệ thống đem thư mục chứa ảnh từ `/storage/app/public` ra truy cập diện rộng `/public/storage`.
+
+**M4V.ME** - Nơi kết nối cộng đồng đích thực! 🎉
+*Dự án phát triển sử dụng nền tảng mở Laravel Framework với luồng kiến trúc cao cấp.*
