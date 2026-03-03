@@ -27,7 +27,38 @@ class ProfileController extends Controller
             'likes_given'    => $user->postLikes()->count() + $user->commentLikes()->count(),
         ];
 
-        return view('profile', compact('user', 'stats'));
+        $recentPosts = $user->posts()
+            ->with('guild')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($p) => [
+                'type'       => 'post',
+                'content'    => $p->title,
+                'url'        => route('guilds.posts.show', [$p->guild_id, $p->id]),
+                'context'    => $p->guild->name ?? '—',
+                'created_at' => $p->created_at,
+            ]);
+
+        $recentComments = $user->comments()
+            ->with('post.guild')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($c) => [
+                'type'       => 'comment',
+                'content'    => \Illuminate\Support\Str::limit(strip_tags($c->content), 100),
+                'url'        => route('guilds.posts.show', [$c->post->guild_id ?? 0, $c->post_id]) . '#comment-' . $c->id,
+                'context'    => $c->post->title ?? '—',
+                'created_at' => $c->created_at,
+            ]);
+
+        $recentActivity = $recentPosts->concat($recentComments)
+            ->sortByDesc('created_at')
+            ->take(8)
+            ->values();
+
+        return view('profile', compact('user', 'stats', 'recentActivity'));
     }
 
     /**
