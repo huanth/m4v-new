@@ -1,137 +1,133 @@
 #!/bin/bash
 
-# M4V.ME Production Deployment Script
-# Usage: ./deploy.sh
+# M4V.ME Script Triển khai (Deploy)
+# Cách dùng: ./deploy.sh
 
-set -e  # Exit on any error
+set -e  # Dừng script nếu có lỗi xảy ra
 
-echo "🚀 Deploying M4V.ME to Production..."
+echo "🚀 Bắt đầu triển khai M4V.ME lên Server..."
 
-# Colors for output
+# Màu sắc cho output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print colored output
 print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[THÔNG TIN]${NC} $1"
 }
 
 print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+    echo -e "${GREEN}[THÀNH CÔNG]${NC} $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+    echo -e "${YELLOW}[CẢNH BÁO]${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+    echo -e "${RED}[LỖI]${NC} $1"
 }
 
-# Check if we're in the right directory
 if [ ! -f "artisan" ]; then
-    print_error "Not in Laravel project directory. Please run from project root."
+    print_error "Không tìm thấy file artisan. Vui lòng chạy script ở thư mục gốc của dự án Laravel."
     exit 1
 fi
 
-# Check if .env exists
 if [ ! -f ".env" ]; then
-    print_error ".env file not found. Please run setup.sh first."
+    print_error "Không tìm thấy file .env. Vui lòng cấu hình môi trường (.env) trước."
     exit 1
 fi
 
-# Create backup before deployment
-print_status "Creating backup..."
+print_status "Đang tạo bản sao lưu dữ liệu tĩnh (storage/app/public)..."
 BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 if [ -d "storage/app/public" ]; then
     cp -r storage/app/public "$BACKUP_DIR/"
-    print_success "Files backed up to $BACKUP_DIR"
+    print_success "Đã sao lưu file thành công vào $BACKUP_DIR"
 fi
 
-# Pull latest code
-print_status "Pulling latest code from repository..."
+print_status "Đang kéo mã nguồn mới nhất từ Git..."
 git pull origin main
 
-# Install/Update dependencies
-print_status "Installing PHP dependencies..."
+print_status "Đang cài đặt PHP dependencies..."
 composer install --optimize-autoloader --no-dev --no-interaction
 
-print_status "Installing Node.js dependencies..."
-npm ci
+print_status "Đang cài đặt Node.js dependencies..."
+npm install
 
-print_status "Building assets for production..."
+print_status "Đang build frontend assets (CSS/JS)..."
 npm run build
 
-# Run migrations
-print_status "Running database migrations..."
+print_status "Đang chạy Database Migrations..."
 php artisan migrate --force
 
-# Clear and rebuild caches
-print_status "Clearing old caches..."
+print_status "Đang xóa bộ nhớ đệm (Cache) cũ..."
 php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 
-print_status "Rebuilding caches..."
+print_status "Đang thiết lập bộ nhớ đệm (Cache) mới..."
 php artisan config:cache
-php artisan route:cache
+php artisan event:cache
 php artisan view:cache
+# Lưu ý: Chỉ bật artisan route:cache nếu bạn không sử dụng các Router Closure.
+# php artisan route:cache
 
-# Optimize autoloader
-print_status "Optimizing autoloader..."
+print_status "Đang tối ưu hệ thống tải lớp (Autoloader)..."
 composer dump-autoload --optimize
 
-# Set permissions
-print_status "Setting file permissions..."
-sudo chown -R www-data:www-data storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
-sudo chmod -R 755 public
+print_status "Đang thiết lập quyền truy cập tệp tin (Permissions)..."
+if [ "$(id -u)" -eq 0 ]; then
+    chown -R www-data:www-data storage bootstrap/cache
+    chmod -R 775 storage bootstrap/cache
+    chmod -R 755 public
+else
+    print_warning "Script không chạy bằng quyền Root/Sudo. Đảm bảo user hiện tại có quyền ghi vào thư mục storage và bootstrap/cache."
+fi
 
-# Check if storage link exists
 if [ ! -L "public/storage" ]; then
-    print_status "Creating storage link..."
+    print_status "Đang tạo Storage Link để cho phép truy cập public files..."
     php artisan storage:link
 fi
 
-# Restart queue workers (if using queues)
-print_status "Restarting queue workers..."
-sudo supervisorctl restart m4v-worker:* || print_warning "Queue workers not configured"
-
-# Clear OPcache (if available)
-if command -v php &> /dev/null; then
-    print_status "Clearing OPcache..."
-    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'OPcache cleared'; } else { echo 'OPcache not available'; }"
+print_status "Đang khởi động lại tiến trình xử lý hàng đợi (Queue Workers)..."
+if command -v supervisorctl &> /dev/null && [ "$(id -u)" -eq 0 ]; then
+    supervisorctl restart m4v-worker:* || print_warning "Không thấy cấu hình Queue Workers trong Supervisor."
+else
+    print_warning "Bỏ qua lệnh khởi động lại Queue Workers (Yêu cầu quyền sudo và gói Supervisor)."
 fi
 
-# Health check
-print_status "Performing health check..."
+if command -v php &> /dev/null; then
+    print_status "Đang dọn dẹp bộ đệm OPcache..."
+    php -r "if (function_exists('opcache_reset')) { opcache_reset(); echo 'Đã xóa OPcache\n'; } else { echo 'Hệ thống OPcache không khả dụng\n'; }"
+fi
+
+print_status "Đang phân tích tình trạng hệ thống (Health Check)..."
 if php artisan about > /dev/null 2>&1; then
-    print_success "Application is healthy"
+    print_success "Hệ thống hoạt động tốt!"
 else
-    print_error "Application health check failed"
+    print_error "Health check thất bại."
     exit 1
 fi
 
-print_success "🎉 Deployment completed successfully!"
-print_status "Application URL: $(grep APP_URL .env | cut -d '=' -f2)"
-print_status "Deployment time: $(date)"
+print_success "🎉 Quá trình triển khai ứng dụng M4V.ME lên máy chủ đã hoàn tất!"
+print_status "Địa chỉ URL: $(grep APP_URL .env | cut -d '=' -f2)"
+print_status "Thời gian: $(date)"
 
 echo ""
-echo "📋 Post-deployment checklist:"
-echo "  ✓ Test website functionality"
-echo "  ✓ Check database connections"
-echo "  ✓ Verify email functionality"
-echo "  ✓ Test file uploads"
-echo "  ✓ Monitor application logs"
+echo "📋 Danh sách hậu kiểm (Post-deployment checklist):"
+echo "  ✓ Truy cập giao diện để kiểm tra hoạt động."
+echo "  ✓ Kiểm tra tính năng bình luận, tạo bang hội."
+echo "  ✓ Kiểm tra việc upload ảnh đại diện / ảnh bìa."
+echo "  ✓ Kiểm tra hệ thống nhận và gửi email."
+echo "  ✓ Theo dõi xem có lỗi gì phát sinh trong file \`storage/logs/laravel.log\` không."
 echo ""
-echo "🔍 Useful commands:"
-echo "  • View logs: tail -f storage/logs/laravel.log"
-echo "  • Check status: php artisan about"
-echo "  • Clear cache: php artisan cache:clear"
+echo "🔍 Một vài câu lệnh tiện ích khác:"
+echo "  • Theo dõi logs trực tiếp: tail -f storage/logs/laravel.log"
+echo "  • Thông tin hệ thống:     php artisan about"
+echo "  • Dọn dẹp cache:          php artisan cache:clear"
 echo ""
