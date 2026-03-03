@@ -2,65 +2,55 @@
 
 namespace App\Policies;
 
+use App\Models\Guild;
 use App\Models\GuildPostComment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class GuildPostCommentPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Determine whether the user can create comments in the guild.
      */
-    public function viewAny(User $user): bool
+    public function create(User $user, Guild $guild): bool
     {
-        return false;
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        return $guild->hasMember($user->id);
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can update the comment.
      */
-    public function view(User $user, GuildPostComment $guildPostComment): bool
+    public function update(User $user, GuildPostComment $comment): bool
     {
-        return false;
+        if ($user->id === $comment->user_id) {
+            return true;
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $membership = $comment->post->guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canManageRoles(); // Phó bang trở lên được sửa
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can delete the comment.
      */
-    public function create(User $user): bool
+    public function delete(User $user, GuildPostComment $comment): bool
     {
-        return false;
-    }
+        if ($user->id === $comment->user_id) {
+            return true;
+        }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, GuildPostComment $guildPostComment): bool
-    {
-        return false;
-    }
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, GuildPostComment $guildPostComment): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, GuildPostComment $guildPostComment): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, GuildPostComment $guildPostComment): bool
-    {
-        return false;
+        $membership = $comment->post->guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canManageRoles();
     }
 }

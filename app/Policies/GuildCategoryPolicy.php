@@ -2,65 +2,38 @@
 
 namespace App\Policies;
 
+use App\Models\Guild;
 use App\Models\GuildCategory;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class GuildCategoryPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Determine whether the user can create categories in the guild.
      */
-    public function viewAny(User $user): bool
+    public function create(User $user, Guild $guild): bool
     {
-        return false;
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $membership = $guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canCreateCategories();
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can update the category.
      */
-    public function view(User $user, GuildCategory $guildCategory): bool
+    public function update(User $user, Guild $guild): bool
     {
-        return false;
+        return $this->create($user, $guild);
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can delete the category.
      */
-    public function create(User $user): bool
+    public function delete(User $user, Guild $guild): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, GuildCategory $guildCategory): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, GuildCategory $guildCategory): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, GuildCategory $guildCategory): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, GuildCategory $guildCategory): bool
-    {
-        return false;
+        return $this->create($user, $guild);
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Guild;
 use App\Models\GuildMember;
 use App\Services\GuildMemberService;
@@ -24,11 +24,10 @@ class GuildMemberController extends Controller
     public function index($id)
     {
         $guild = Guild::with(['leader', 'members.user'])->findOrFail($id);
-        $user = Auth::user();
         
         $userMembership = null;
-        if ($user) {
-            $userMembership = $guild->members()->where('user_id', $user->id)->first();
+        if (auth()->check()) {
+            $userMembership = $guild->members()->where('user_id', auth()->id())->first();
         }
 
         $members = $guild->members()->with('user')->get();
@@ -43,18 +42,10 @@ class GuildMemberController extends Controller
     public function join($id)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
 
-        if (!$guild->canUserJoin($user->id)) {
-            if ($guild->hasMember($user->id)) {
-                return redirect()->back()->with('error', 'Bạn đã là thành viên của bang hội này rồi.');
-            }
-            if (!$guild->is_active) {
-                return redirect()->back()->with('error', 'Bang hội này đã bị vô hiệu hóa.');
-            }
-        }
+        Gate::authorize('join', $guild);
 
-        $this->guildMemberService->joinGuild($guild, $user->id);
+        $this->guildMemberService->joinGuild($guild, auth()->id());
 
         return redirect()->back()->with('success', 'Gia nhập bang hội thành công!');
     }
@@ -65,19 +56,10 @@ class GuildMemberController extends Controller
     public function leave($id)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
 
-        $membership = $guild->members()->where('user_id', $user->id)->first();
-        
-        if (!$membership) {
-            return redirect()->back()->with('error', 'Bạn không phải là thành viên của bang hội này.');
-        }
+        Gate::authorize('leave', $guild);
 
-        if ($membership->isLeader()) {
-            return redirect()->back()->with('error', 'Bang chủ không thể rời bang hội. Hãy chuyển quyền bang chủ trước.');
-        }
-
-        $this->guildMemberService->leaveGuild($guild, $user->id);
+        $this->guildMemberService->leaveGuild($guild, auth()->id());
 
         return redirect()->route('guilds.index')
             ->with('success', 'Rời bang hội thành công!');
@@ -89,15 +71,6 @@ class GuildMemberController extends Controller
     public function updateRole(Request $request, $id)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
-        
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        $canManage = $user->isSuperAdmin() || $user->isAdmin();
-        
-        if (!$canManage && (!$userMembership || !$userMembership->canManageRoles())) {
-            return redirect()->back()->with('error', 'Bạn không có quyền quản lý role.');
-        }
 
         $request->validate([
             'member_id' => 'required|exists:guild_members,id',
@@ -106,15 +79,9 @@ class GuildMemberController extends Controller
 
         $member = GuildMember::where('id', $request->member_id)
             ->where('guild_id', $guild->id)
-            ->first();
+            ->firstOrFail();
 
-        if (!$member) {
-            return redirect()->back()->with('error', 'Thành viên không tồn tại.');
-        }
-
-        if ($member->isLeader()) {
-            return redirect()->back()->with('error', 'Không thể thay đổi role của bang chủ.');
-        }
+        Gate::authorize('updateRole', [$guild, $member]);
 
         $this->guildMemberService->updateRole($member, $request->role);
 

@@ -2,65 +2,76 @@
 
 namespace App\Policies;
 
+use App\Models\Guild;
 use App\Models\GuildPost;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class GuildPostPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Determine whether the user can create posts in the guild.
      */
-    public function viewAny(User $user): bool
+    public function create(User $user, Guild $guild): bool
     {
-        return false;
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        return $guild->hasMember($user->id);
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Determine whether the user can update the post.
      */
-    public function view(User $user, GuildPost $guildPost): bool
+    public function update(User $user, GuildPost $post): bool
     {
-        return false;
+        if ($user->id === $post->author_id) {
+            return true;
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $membership = $post->guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canManageRoles(); // Phó bang trở lên được sửa
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can delete the post.
      */
-    public function create(User $user): bool
+    public function delete(User $user, GuildPost $post): bool
     {
-        return false;
+        if ($user->id === $post->author_id) {
+            return true;
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $membership = $post->guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canManageRoles();
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Determine whether the user can pin the post.
      */
-    public function update(User $user, GuildPost $guildPost): bool
+    public function pin(User $user, GuildPost $post): bool
     {
-        return false;
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $membership = $post->guild->members()->where('user_id', $user->id)->first();
+        return $membership && $membership->canManageRoles();
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Determine whether the user can lock the post.
      */
-    public function delete(User $user, GuildPost $guildPost): bool
+    public function lock(User $user, GuildPost $post): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, GuildPost $guildPost): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, GuildPost $guildPost): bool
-    {
-        return false;
+        return $this->pin($user, $post);
     }
 }

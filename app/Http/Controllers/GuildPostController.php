@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Guild;
 use App\Models\GuildPost;
 use App\Models\GuildCategory;
@@ -25,13 +25,10 @@ class GuildPostController extends Controller
     public function create($id)
     {
         $guild = Guild::with(['categories'])->findOrFail($id);
-        $user = Auth::user();
         
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        if (!$userMembership) {
-            return redirect()->back()->with('error', 'Bạn phải là thành viên của bang hội để tạo bài viết.');
-        }
+        Gate::authorize('create', [GuildPost::class, $guild]);
+
+        $userMembership = $guild->members()->where('user_id', auth()->id())->first();
 
         return view('guilds.posts.create', compact('guild', 'userMembership'));
     }
@@ -42,13 +39,8 @@ class GuildPostController extends Controller
     public function store(Request $request, $id)
     {
         $guild = Guild::findOrFail($id);
-        $user = Auth::user();
         
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        if (!$userMembership) {
-            return redirect()->back()->with('error', 'Bạn phải là thành viên của bang hội để tạo bài viết.');
-        }
+        Gate::authorize('create', [GuildPost::class, $guild]);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -66,7 +58,7 @@ class GuildPostController extends Controller
             }
         }
 
-        $this->guildPostService->createPost($guild->id, $user->id, $request->all());
+        $this->guildPostService->createPost($guild->id, auth()->id(), $request->all());
 
         return redirect()->route('guilds.show', $guild->id)
             ->with('success', 'Tạo bài viết thành công!');
@@ -92,10 +84,9 @@ class GuildPostController extends Controller
             ->with(['user', 'parent.user'])
             ->paginate(10);
 
-        $user = Auth::user();
         $userMembership = null;
-        if ($user) {
-            $userMembership = $guild->members()->where('user_id', $user->id)->first();
+        if (auth()->check()) {
+            $userMembership = $guild->members()->where('user_id', auth()->id())->first();
         }
 
         $post->incrementViews();
@@ -113,12 +104,9 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        $userMembership = $guild->members()->where('user_id', $user->id)->first();
-        
-        if (!$post->canEdit($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa bài viết này.');
-        }
+        Gate::authorize('update', $post);
+
+        $userMembership = $guild->members()->where('user_id', auth()->id())->first();
 
         return view('guilds.posts.edit', compact('guild', 'post', 'userMembership'));
     }
@@ -133,11 +121,7 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$post->canEdit($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền chỉnh sửa bài viết này.');
-        }
+        Gate::authorize('update', $post);
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -171,11 +155,7 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$post->canDelete($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền xóa bài viết này.');
-        }
+        Gate::authorize('delete', $post);
 
         $this->guildPostService->deletePost($post);
 
@@ -193,11 +173,7 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$post->canPin($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền ghim bài viết này.');
-        }
+        Gate::authorize('pin', $post);
 
         $this->guildPostService->togglePin($post);
 
@@ -215,11 +191,7 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-        
-        if (!$post->canLock($user->id)) {
-            return redirect()->back()->with('error', 'Bạn không có quyền khóa bài viết này.');
-        }
+        Gate::authorize('lock', $post);
 
         $this->guildPostService->toggleLock($post);
 
@@ -237,9 +209,7 @@ class GuildPostController extends Controller
             ->where('guild_id', $guild->id)
             ->firstOrFail();
 
-        $user = Auth::user();
-
-        $liked = $this->guildPostService->toggleLike($post, $user->id);
+        $liked = $this->guildPostService->toggleLike($post, auth()->id());
 
         $message = $liked ? 'Đã thích bài viết!' : 'Đã bỏ thích bài viết!';
         return redirect()->back()->with('success', $message);
