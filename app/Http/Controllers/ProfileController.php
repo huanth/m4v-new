@@ -29,8 +29,51 @@ class ProfileController extends Controller
         $currentUser = Auth::user();
         $banHistory = $user->getBanHistory();
         $activeBan = $user->getActiveBan();
-        
-        return view('user.profile', compact('user', 'currentUser', 'banHistory', 'activeBan'));
+
+        // Thống kê hoạt động thực tế
+        $stats = [
+            'posts_count'    => $user->posts()->count(),
+            'comments_count' => $user->comments()->count(),
+            'likes_received' => \App\Models\GuildPostLike::whereIn('post_id', $user->posts()->pluck('id'))->count()
+                              + \App\Models\GuildCommentLike::whereIn('comment_id', $user->comments()->pluck('id'))->count(),
+            'likes_given'    => $user->postLikes()->count() + $user->commentLikes()->count(),
+        ];
+
+        // Hoạt động gần đây: gộp 5 bài viết + 5 bình luận mới nhất, sort theo thời gian
+        $recentPosts = $user->posts()
+            ->with('guild')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($p) => [
+                'type'       => 'post',
+                'content'    => $p->title,
+                'url'        => route('guilds.posts.show', [$p->guild_id, $p->id]),
+                'context'    => $p->guild->name ?? '—',
+                'created_at' => $p->created_at,
+            ]);
+
+        $recentComments = $user->comments()
+            ->with('post.guild')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(fn($c) => [
+                'type'       => 'comment',
+                'content'    => \Illuminate\Support\Str::limit(strip_tags($c->content), 100),
+                'url'        => route('guilds.posts.show', [$c->post->guild_id ?? 0, $c->post_id]) . '#comment-' . $c->id,
+                'context'    => $c->post->title ?? '—',
+                'created_at' => $c->created_at,
+            ]);
+
+        $recentActivity = $recentPosts->concat($recentComments)
+            ->sortByDesc('created_at')
+            ->take(8)
+            ->values();
+
+        return view('user.profile', compact(
+            'user', 'currentUser', 'banHistory', 'activeBan', 'stats', 'recentActivity'
+        ));
     }
 
     /**

@@ -220,20 +220,20 @@
                             <h2 class="text-xl font-semibold text-blue-800 mb-4">Thống kê hoạt động</h2>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-900">0</div>
+                                    <div class="text-2xl font-bold text-blue-900">{{ $stats['posts_count'] }}</div>
                                     <div class="text-sm text-blue-700">Bài viết</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-900">0</div>
+                                    <div class="text-2xl font-bold text-blue-900">{{ $stats['comments_count'] }}</div>
                                     <div class="text-sm text-blue-700">Bình luận</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-900">0</div>
-                                    <div class="text-sm text-blue-700">Điểm uy tín</div>
+                                    <div class="text-2xl font-bold text-blue-900">{{ $stats['likes_received'] }}</div>
+                                    <div class="text-sm text-blue-700">Lượt thích nhận</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-900">0</div>
-                                    <div class="text-sm text-blue-700">Lượt thích</div>
+                                    <div class="text-2xl font-bold text-blue-900">{{ $stats['likes_given'] }}</div>
+                                    <div class="text-sm text-blue-700">Lượt thích tặng</div>
                                 </div>
                             </div>
                         </div>
@@ -241,12 +241,48 @@
                         <!-- Recent Activity -->
                         <div class="bg-white border border-gray-200 p-6 rounded-lg">
                             <h2 class="text-xl font-semibold text-gray-800 mb-4">Hoạt động gần đây</h2>
-                            <div class="text-center text-gray-500 py-8">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                <p class="mt-2">Chưa có hoạt động nào</p>
-                            </div>
+
+                            @if($recentActivity->isNotEmpty())
+                                <div class="space-y-3">
+                                    @foreach($recentActivity as $item)
+                                        <a href="{{ $item['url'] }}"
+                                           class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group">
+                                            <div class="flex-shrink-0 mt-0.5">
+                                                @if($item['type'] === 'post')
+                                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100">
+                                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-100">
+                                                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                                        </svg>
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate">
+                                                    {{ $item['content'] }}
+                                                </p>
+                                                <p class="text-xs text-gray-500 mt-0.5">
+                                                    {{ $item['type'] === 'post' ? 'Bài viết' : 'Bình luận' }}
+                                                    trong <span class="font-medium">{{ $item['context'] }}</span>
+                                                    &bull; {{ $item['created_at']->diffForHumans() }}
+                                                </p>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center text-gray-500 py-8">
+                                    <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm">Chưa có hoạt động nào</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
 

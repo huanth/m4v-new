@@ -345,4 +345,30 @@ class User extends Authenticatable
     {
         return $this->notifications()->unread()->with('fromUser')->latest()->get();
     }
+
+    // ─── Activity Relationships ───────────────────────────────────────────────
+
+    /** Bài viết do user tạo */
+    public function posts()
+    {
+        return $this->hasMany(GuildPost::class, 'author_id');
+    }
+
+    /** Bình luận do user tạo */
+    public function comments()
+    {
+        return $this->hasMany(GuildPostComment::class, 'user_id');
+    }
+
+    /** Lượt thích bài viết user đã tặng */
+    public function postLikes()
+    {
+        return $this->hasMany(GuildPostLike::class, 'user_id');
+    }
+
+    /** Lượt thích bình luận user đã tặng */
+    public function commentLikes()
+    {
+        return $this->hasMany(GuildCommentLike::class, 'user_id');
+    }
 }
