@@ -31,7 +31,23 @@ class NotificationController extends Controller
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read and redirect to its target URL (click handler)
+     */
+    public function redirect($id)
+    {
+        $user = Auth::user();
+        $notification = AppNotification::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $notification->markAsRead();
+        $url = $notification->getUrl();
+
+        return redirect($url ?: '/');
+    }
+
+    /**
+     * Mark notification as read (AJAX)
      */
     public function markAsRead($id)
     {

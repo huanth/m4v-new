@@ -23,88 +23,96 @@ class Notification extends Model
         'is_read' => 'boolean',
     ];
 
-    /**
-     * Get the user who receives the notification
-     */
+    // Support both shortname (legacy) and FQN for morphTo resolution
+    protected $morphMap = [];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the user who sent the notification
-     */
     public function fromUser()
     {
         return $this->belongsTo(User::class, 'from_user_id');
     }
 
-    /**
-     * Get the related model (post or comment)
-     */
     public function related()
     {
         return $this->morphTo('related', 'related_type', 'related_id');
     }
 
-    /**
-     * Scope for unread notifications
-     */
     public function scopeUnread($query)
     {
         return $query->where('is_read', false);
     }
 
-    /**
-     * Scope for read notifications
-     */
     public function scopeRead($query)
     {
         return $query->where('is_read', true);
     }
 
-    /**
-     * Mark notification as read
-     */
     public function markAsRead()
     {
         $this->update(['is_read' => true]);
     }
 
-    /**
-     * Mark notification as unread
-     */
     public function markAsUnread()
     {
         $this->update(['is_read' => false]);
     }
 
     /**
-     * Get the URL for this notification
+     * Resolve the related model manually, supporting both shortname and FQN.
      */
-    public function getUrl()
+    private function resolveRelated(): ?Model
     {
+        $typeMap = [
+            'GuildPost'         => GuildPost::class,
+            'GuildPostComment'  => GuildPostComment::class,
+            GuildPost::class    => GuildPost::class,
+            GuildPostComment::class => GuildPostComment::class,
+        ];
+
+        $modelClass = $typeMap[$this->related_type] ?? null;
+        if (!$modelClass || !$this->related_id) {
+            return null;
+        }
+
+        return $modelClass::find($this->related_id);
+    }
+
+    /**
+     * Get the URL for this notification.
+     * Returns '/' as fallback so redirect is always safe.
+     */
+    public function getUrl(): string
+    {
+        $related = $this->resolveRelated();
+
         switch ($this->type) {
             case 'post_like':
             case 'post_comment':
-                // For post-related notifications, link to the post
-                if ($this->related_type === 'App\Models\GuildPost') {
-                    $post = $this->related;
+                /** @var GuildPost|null $post */
+                $post = $related;
+                if ($post) {
                     return route('guilds.posts.show', [$post->guild_id, $post->id]);
                 }
                 break;
-                
+
             case 'comment_like':
             case 'comment_reply':
-                // For comment-related notifications, link to the post containing the comment
-                if ($this->related_type === 'App\Models\GuildPostComment') {
-                    $comment = $this->related;
-                    $post = $comment->post;
-                    return route('guilds.posts.show', [$post->guild_id, $post->id]) . '#comment-' . $comment->id;
+                /** @var GuildPostComment|null $comment */
+                $comment = $related;
+                if ($comment) {
+                    $post = $comment->post ?? GuildPost::find($comment->post_id);
+                    if ($post) {
+                        return route('guilds.posts.show', [$post->guild_id, $post->id])
+                            . '#comment-' . $comment->id;
+                    }
                 }
                 break;
         }
-        
-        return '#';
+
+        return '/';
     }
 }

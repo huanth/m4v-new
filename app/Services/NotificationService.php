@@ -27,7 +27,7 @@ class NotificationService
             'from_user_id' => $fromUserId,
             'type' => 'post_like',
             'related_id' => $postId,
-            'related_type' => 'GuildPost',
+            'related_type' => GuildPost::class,
             'message' => $message,
         ]);
     }
@@ -50,7 +50,7 @@ class NotificationService
             'from_user_id' => $fromUserId,
             'type' => 'post_comment',
             'related_id' => $postId,
-            'related_type' => 'GuildPost',
+            'related_type' => GuildPost::class,
             'message' => $message,
         ]);
     }
@@ -73,7 +73,7 @@ class NotificationService
             'from_user_id' => $fromUserId,
             'type' => 'comment_like',
             'related_id' => $commentId,
-            'related_type' => 'GuildPostComment',
+            'related_type' => GuildPostComment::class,
             'message' => $message,
         ]);
     }
@@ -96,7 +96,7 @@ class NotificationService
             'from_user_id' => $replyComment->user_id,
             'type' => 'comment_reply',
             'related_id' => $replyCommentId,
-            'related_type' => 'GuildPostComment',
+            'related_type' => GuildPostComment::class,
             'message' => $message,
         ]);
     }

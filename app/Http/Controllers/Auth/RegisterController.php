@@ -51,11 +51,14 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // First registered account automatically gets the highest role (SADMIN)
+        $isFirstUser = !User::exists();
+
         return User::create([
             'username' => $data['username'],
-            'email' => $data['email'],
+            'email'    => $data['email'],
             'password' => Hash::make($data['password']),
-            'role' => User::ROLE_USER, // Default role is user
+            'role'     => $isFirstUser ? User::ROLE_SUPER_ADMIN : User::ROLE_USER,
         ]);
     }
 

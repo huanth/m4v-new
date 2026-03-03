@@ -33,7 +33,7 @@
             @if($notifications->count() > 0)
                 <div class="divide-y divide-gray-200">
                     @foreach($notifications as $notification)
-                        <a href="{{ $notification->getUrl() }}" class="block">
+                        <a href="{{ route('notifications.redirect', $notification->id) }}" class="block">
                             <div class="p-6 hover:bg-gray-50 transition-colors {{ !$notification->is_read ? 'bg-blue-50' : '' }}">
                                 <div class="flex items-start space-x-4">
                                 <!-- Avatar -->
