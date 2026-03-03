@@ -7,14 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Guild;
 use App\Models\GuildPost;
 use App\Models\GuildPostComment;
-use App\Models\GuildCommentLike;
-use App\Services\NotificationService;
+use App\Services\GuildCommentService;
 
 class GuildCommentController extends Controller
 {
-    public function __construct()
+    protected GuildCommentService $guildCommentService;
+
+    public function __construct(GuildCommentService $guildCommentService)
     {
         $this->middleware('auth');
+        $this->guildCommentService = $guildCommentService;
     }
 
     /**
@@ -45,29 +47,7 @@ class GuildCommentController extends Controller
             }
         }
 
-        $quotedContent = null;
-        if ($request->parent_id && $request->has('include_quote') && $request->quoted_content) {
-            $quotedContent = $request->quoted_content;
-        }
-
-        $comment = GuildPostComment::create([
-            'post_id' => $post->id,
-            'user_id' => $user->id,
-            'parent_id' => $request->parent_id,
-            'quoted_content' => $quotedContent,
-            'content' => $request->content,
-        ]);
-
-        \Cache::forget("post_activity_{$post->id}");
-
-        NotificationService::createPostCommentNotification($post->id, $user->id);
-
-        if ($request->parent_id) {
-            $parentComment = GuildPostComment::find($request->parent_id);
-            if ($parentComment && $parentComment->user_id != $user->id) {
-                NotificationService::createCommentReplyNotification($comment->id, $parentComment->user_id);
-            }
-        }
+        $this->guildCommentService->createComment($post->id, $user->id, $request->all());
 
         $message = $request->parent_id ? 'Đã trả lời bình luận!' : 'Đã thêm bình luận!';
         return redirect()->back()->with('success', $message);
@@ -97,7 +77,7 @@ class GuildCommentController extends Controller
             'content' => 'required|string|max:2000',
         ]);
 
-        $comment->update(['content' => $request->content]);
+        $this->guildCommentService->updateComment($comment, $request->all());
 
         return redirect()->back()->with('success', 'Đã cập nhật bình luận!');
     }
@@ -122,7 +102,7 @@ class GuildCommentController extends Controller
             return redirect()->back()->with('error', 'Bạn không có quyền xóa bình luận này.');
         }
 
-        $comment->delete();
+        $this->guildCommentService->deleteComment($comment);
 
         return redirect()->back()->with('success', 'Đã xóa bình luận!');
     }
@@ -143,23 +123,9 @@ class GuildCommentController extends Controller
 
         $user = Auth::user();
 
-        $existingLike = GuildCommentLike::where('comment_id', $comment->id)
-            ->where('user_id', $user->id)
-            ->first();
+        $liked = $this->guildCommentService->toggleLike($comment, $user->id);
 
-        if ($existingLike) {
-            $existingLike->delete();
-            $message = 'Đã bỏ thích bình luận!';
-        } else {
-            GuildCommentLike::create([
-                'comment_id' => $comment->id,
-                'user_id' => $user->id,
-            ]);
-            $message = 'Đã thích bình luận!';
-            
-            NotificationService::createCommentLikeNotification($comment->id, $user->id);
-        }
-
+        $message = $liked ? 'Đã thích bình luận!' : 'Đã bỏ thích bình luận!';
         return redirect()->back()->with('success', $message);
     }
 }
