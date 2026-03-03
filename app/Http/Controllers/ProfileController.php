@@ -18,7 +18,16 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('profile', compact('user'));
+
+        $stats = [
+            'posts_count'    => $user->posts()->count(),
+            'comments_count' => $user->comments()->count(),
+            'likes_received' => \App\Models\GuildPostLike::whereIn('post_id', $user->posts()->pluck('id'))->count()
+                              + \App\Models\GuildCommentLike::whereIn('comment_id', $user->comments()->pluck('id'))->count(),
+            'likes_given'    => $user->postLikes()->count() + $user->commentLikes()->count(),
+        ];
+
+        return view('profile', compact('user', 'stats'));
     }
 
     /**

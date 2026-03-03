@@ -176,18 +176,22 @@
                         <div class="space-y-3">
                             <div class="flex justify-between">
                                 <span class="text-blue-700">Bài viết đã đăng:</span>
-                                <span class="font-medium text-blue-900">0</span>
+                                <span class="font-medium text-blue-900">{{ $stats['posts_count'] }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-blue-700">Bình luận:</span>
-                                <span class="font-medium text-blue-900">0</span>
+                                <span class="font-medium text-blue-900">{{ $stats['comments_count'] }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-blue-700">Điểm uy tín:</span>
-                                <span class="font-medium text-blue-900">0</span>
+                                <span class="text-blue-700">Lượt thích nhận:</span>
+                                <span class="font-medium text-blue-900">{{ $stats['likes_received'] }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-blue-700">Lần đăng nhập cuối:</span>
+                                <span class="text-blue-700">Lượt thích đã tặng:</span>
+                                <span class="font-medium text-blue-900">{{ $stats['likes_given'] }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-blue-700">Lần cập nhật cuối:</span>
                                 <span class="font-medium text-blue-900">{{ $user->updated_at->format('d/m/Y H:i') }}</span>
                             </div>
                         </div>
