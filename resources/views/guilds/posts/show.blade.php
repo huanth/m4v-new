@@ -76,7 +76,10 @@
                                         default => 'text-gray-900',
                                     };
                                 @endphp
-                                <span class="font-medium {{ $usernameColor }}">{{ $username }}</span>
+                                <a href="{{ route('user.profile', $post->author) }}"
+                                   class="font-medium {{ $usernameColor }} hover:underline transition-colors">
+                                    {{ $username }}
+                                </a>
 
                                 <!-- Role in guild -->
                                 @php
@@ -270,9 +273,11 @@
                                                 default => 'text-gray-900',
                                             };
                                         @endphp
-                                        <p class="text-sm text-center font-semibold {{ $roleColor }}" style="word-break: break-word;">
+                                        <a href="{{ route('user.profile', $comment->user) }}"
+                                           class="text-sm text-center font-semibold {{ $roleColor }} hover:underline transition-colors"
+                                           style="word-break: break-word;">
                                             {{ $comment->user->username }}
-                                        </p>
+                                        </a>
 
                                         <!-- Role in guild -->
                                         @php

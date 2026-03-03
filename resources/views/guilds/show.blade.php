@@ -136,7 +136,10 @@
                                                         </span>
                                                     </div>
                                                 @endif
-                                                <span>{{ $post->author->username }}</span>
+                                                <a href="{{ route('user.profile', $post->author) }}"
+                                                   class="hover:underline hover:text-blue-600 transition-colors">
+                                                    {{ $post->author->username }}
+                                                </a>
                                             </div>
                                             <span>•</span>
                                             <span>{{ $post->created_at->format('d/m/Y H:i') }}</span>

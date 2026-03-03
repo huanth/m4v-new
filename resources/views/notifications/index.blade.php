@@ -54,7 +54,10 @@
                                     <div class="flex items-center justify-between">
                                         <div class="flex-1">
                                             <p class="text-sm text-gray-900">
-                                                <span class="font-medium">{{ $notification->fromUser->username }}</span>
+                                                <a href="{{ route('user.profile', $notification->fromUser) }}"
+                                                   class="font-medium hover:underline hover:text-blue-600 transition-colors">
+                                                    {{ $notification->fromUser->username }}
+                                                </a>
                                                 {{ $notification->message }}
                                             </p>
                                             <p class="text-xs text-gray-500 mt-1">

@@ -91,7 +91,8 @@
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center space-x-2">
                                                 <p class="text-sm font-medium text-gray-900 truncate">
-                                                    <a href="{{ route('user.show', $member->user->id) }}" class="hover:text-blue-600">
+                                                    <a href="{{ route('user.profile', $member->user) }}"
+                                                       class="hover:underline hover:text-blue-600 transition-colors">
                                                         {{ $member->user->username }}
                                                     </a>
                                                 </p>
