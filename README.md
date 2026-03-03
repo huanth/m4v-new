@@ -810,9 +810,8 @@ location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
 5. Open Pull Request
 
 ### 📧 Contact
-- **Email**: support@m4v.me
-- **Website**: https://m4v.me
-- **GitHub**: https://github.com/your-username/m4v-clone
+- **Email**: nauhyuh@gmail.com
+- **GitHub**: https://github.com/huanth/m4v-new
 
 ---
 

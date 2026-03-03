@@ -59,35 +59,55 @@ Route::post('/chat/{userId}/read', [MessageController::class, 'markAsRead'])->na
 Route::get('/chat/unread/count', [MessageController::class, 'getUnreadCount'])->name('chat.unread.count')->middleware(['auth', 'check.ban']);
 Route::get('/chat/unread/conversations-count', [MessageController::class, 'getUnreadConversationsCount'])->name('chat.unread.conversations-count')->middleware(['auth', 'check.ban']);
 
+use App\Http\Controllers\GuildCategoryController;
+use App\Http\Controllers\GuildMemberController;
+use App\Http\Controllers\GuildPostController;
+use App\Http\Controllers\GuildCommentController;
+use App\Http\Controllers\GuildSettingController;
+
 // Guild System - Public viewing (anyone can view)
 Route::get('/guilds', [GuildController::class, 'index'])->name('guilds.index');
 Route::get('/{id}', [GuildController::class, 'show'])->name('guilds.show')->where('id', '[0-9]+');
-Route::get('/{id}/members', [GuildController::class, 'showMembers'])->name('guilds.members')->where('id', '[0-9]+');
-Route::get('/{id}/posts/{postId}', [GuildController::class, 'showPost'])->name('guilds.posts.show')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+Route::get('/{id}/members', [GuildMemberController::class, 'index'])->name('guilds.members')->where('id', '[0-9]+');
+Route::get('/{id}/posts/{postId}', [GuildPostController::class, 'show'])->name('guilds.posts.show')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+
 // Guild System (Authenticated users only)
-Route::get('/guilds/create', [GuildController::class, 'create'])->name('guilds.create')->middleware(['auth', 'check.ban']);
-Route::post('/guilds', [GuildController::class, 'store'])->name('guilds.store')->middleware(['auth', 'check.ban']);
-Route::get('/{id}/manage', [GuildController::class, 'manage'])->name('guilds.manage')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/join', [GuildController::class, 'join'])->name('guilds.join')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/leave', [GuildController::class, 'leave'])->name('guilds.leave')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/member/role', [GuildController::class, 'updateMemberRole'])->name('guilds.member.role')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/category', [GuildController::class, 'createCategory'])->name('guilds.category.create')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::put('/{id}/category/{categoryId}', [GuildController::class, 'updateCategory'])->name('guilds.category.update')->where('id', '[0-9]+')->where('categoryId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::delete('/{id}/category/{categoryId}', [GuildController::class, 'deleteCategory'])->name('guilds.category.delete')->where('id', '[0-9]+')->where('categoryId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/banner', [GuildController::class, 'updateBanner'])->name('guilds.banner.update')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/announcement', [GuildController::class, 'updateAnnouncement'])->name('guilds.announcement.update')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::get('/{id}/posts/create', [GuildController::class, 'createPost'])->name('guilds.posts.create')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts', [GuildController::class, 'storePost'])->name('guilds.posts.store')->where('id', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::get('/{id}/posts/{postId}/edit', [GuildController::class, 'editPost'])->name('guilds.posts.edit')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::put('/{id}/posts/{postId}', [GuildController::class, 'updatePost'])->name('guilds.posts.update')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::delete('/{id}/posts/{postId}', [GuildController::class, 'deletePost'])->name('guilds.posts.delete')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts/{postId}/pin', [GuildController::class, 'togglePinPost'])->name('guilds.posts.pin')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts/{postId}/lock', [GuildController::class, 'toggleLockPost'])->name('guilds.posts.lock')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts/{postId}/like', [GuildController::class, 'toggleLikePost'])->name('guilds.posts.like')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts/{postId}/comments', [GuildController::class, 'addComment'])->name('guilds.posts.comments.store')->where('id', '[0-9]+')->where('postId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::put('/{id}/posts/{postId}/comments/{commentId}', [GuildController::class, 'editComment'])->name('guilds.posts.comments.update')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::delete('/{id}/posts/{postId}/comments/{commentId}', [GuildController::class, 'deleteComment'])->name('guilds.posts.comments.delete')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+')->middleware(['auth', 'check.ban']);
-Route::post('/{id}/posts/{postId}/comments/{commentId}/like', [GuildController::class, 'toggleLikeComment'])->name('guilds.posts.comments.like')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+')->middleware(['auth', 'check.ban']);
+Route::middleware(['auth', 'check.ban'])->group(function () {
+    // Basic Guild
+    Route::get('/guilds/create', [GuildController::class, 'create'])->name('guilds.create');
+    Route::post('/guilds', [GuildController::class, 'store'])->name('guilds.store');
+    
+    // Guild Settings & Role
+    Route::get('/{id}/manage', [GuildSettingController::class, 'edit'])->name('guilds.manage')->where('id', '[0-9]+');
+    Route::post('/{id}/banner', [GuildSettingController::class, 'updateBanner'])->name('guilds.banner.update')->where('id', '[0-9]+');
+    Route::post('/{id}/announcement', [GuildSettingController::class, 'updateAnnouncement'])->name('guilds.announcement.update')->where('id', '[0-9]+');
+    
+    // Guild Member
+    Route::post('/{id}/join', [GuildMemberController::class, 'join'])->name('guilds.join')->where('id', '[0-9]+');
+    Route::post('/{id}/leave', [GuildMemberController::class, 'leave'])->name('guilds.leave')->where('id', '[0-9]+');
+    Route::post('/{id}/member/role', [GuildMemberController::class, 'updateRole'])->name('guilds.member.role')->where('id', '[0-9]+');
+    
+    // Categories
+    Route::post('/{id}/category', [GuildCategoryController::class, 'store'])->name('guilds.category.create')->where('id', '[0-9]+');
+    Route::put('/{id}/category/{categoryId}', [GuildCategoryController::class, 'update'])->name('guilds.category.update')->where('id', '[0-9]+')->where('categoryId', '[0-9]+');
+    Route::delete('/{id}/category/{categoryId}', [GuildCategoryController::class, 'destroy'])->name('guilds.category.delete')->where('id', '[0-9]+')->where('categoryId', '[0-9]+');
+    
+    // Posts
+    Route::get('/{id}/posts/create', [GuildPostController::class, 'create'])->name('guilds.posts.create')->where('id', '[0-9]+');
+    Route::post('/{id}/posts', [GuildPostController::class, 'store'])->name('guilds.posts.store')->where('id', '[0-9]+');
+    Route::get('/{id}/posts/{postId}/edit', [GuildPostController::class, 'edit'])->name('guilds.posts.edit')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::put('/{id}/posts/{postId}', [GuildPostController::class, 'update'])->name('guilds.posts.update')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::delete('/{id}/posts/{postId}', [GuildPostController::class, 'destroy'])->name('guilds.posts.delete')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::post('/{id}/posts/{postId}/pin', [GuildPostController::class, 'togglePin'])->name('guilds.posts.pin')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::post('/{id}/posts/{postId}/lock', [GuildPostController::class, 'toggleLock'])->name('guilds.posts.lock')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::post('/{id}/posts/{postId}/like', [GuildPostController::class, 'toggleLike'])->name('guilds.posts.like')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    
+    // Comments
+    Route::post('/{id}/posts/{postId}/comments', [GuildCommentController::class, 'store'])->name('guilds.posts.comments.store')->where('id', '[0-9]+')->where('postId', '[0-9]+');
+    Route::put('/{id}/posts/{postId}/comments/{commentId}', [GuildCommentController::class, 'update'])->name('guilds.posts.comments.update')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+');
+    Route::delete('/{id}/posts/{postId}/comments/{commentId}', [GuildCommentController::class, 'destroy'])->name('guilds.posts.comments.delete')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+');
+    Route::post('/{id}/posts/{postId}/comments/{commentId}/like', [GuildCommentController::class, 'toggleLike'])->name('guilds.posts.comments.like')->where('id', '[0-9]+')->where('postId', '[0-9]+')->where('commentId', '[0-9]+');
+});
 
 // User Profile Routes
 Route::middleware(['auth', 'check.ban'])->group(function () {
