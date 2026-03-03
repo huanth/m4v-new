@@ -7,14 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Guild;
 use App\Models\GuildPost;
 use App\Models\GuildCategory;
-use App\Models\GuildPostLike;
-use App\Services\NotificationService;
+use App\Services\GuildPostService;
 
 class GuildPostController extends Controller
 {
-    public function __construct()
+    protected GuildPostService $guildPostService;
+
+    public function __construct(GuildPostService $guildPostService)
     {
         $this->middleware('auth')->except(['show']);
+        $this->guildPostService = $guildPostService;
     }
 
     /**
@@ -64,13 +66,7 @@ class GuildPostController extends Controller
             }
         }
 
-        GuildPost::create([
-            'guild_id' => $guild->id,
-            'category_id' => $request->category_id,
-            'author_id' => $user->id,
-            'title' => $request->title,
-            'content' => $request->content,
-        ]);
+        $this->guildPostService->createPost($guild->id, $user->id, $request->all());
 
         return redirect()->route('guilds.show', $guild->id)
             ->with('success', 'Tạo bài viết thành công!');
@@ -159,11 +155,7 @@ class GuildPostController extends Controller
             }
         }
 
-        $post->update([
-            'title' => $request->title,
-            'content' => $request->content,
-            'category_id' => $request->category_id,
-        ]);
+        $this->guildPostService->updatePost($post, $request->all());
 
         return redirect()->route('guilds.posts.show', [$guild->id, $post->id])
             ->with('success', 'Cập nhật bài viết thành công!');
@@ -185,7 +177,7 @@ class GuildPostController extends Controller
             return redirect()->back()->with('error', 'Bạn không có quyền xóa bài viết này.');
         }
 
-        $post->delete();
+        $this->guildPostService->deletePost($post);
 
         return redirect()->route('guilds.show', $guild->id)
             ->with('success', 'Xóa bài viết thành công!');
@@ -207,7 +199,7 @@ class GuildPostController extends Controller
             return redirect()->back()->with('error', 'Bạn không có quyền ghim bài viết này.');
         }
 
-        $post->update(['is_pinned' => !$post->is_pinned]);
+        $this->guildPostService->togglePin($post);
 
         $status = $post->is_pinned ? 'ghim' : 'bỏ ghim';
         return redirect()->back()->with('success', "Đã {$status} bài viết thành công!");
@@ -229,9 +221,9 @@ class GuildPostController extends Controller
             return redirect()->back()->with('error', 'Bạn không có quyền khóa bài viết này.');
         }
 
-        $post->update(['is_locked' => !$post->is_locked]);
+        $this->guildPostService->toggleLock($post);
 
-        $status = $post->is_locked ? 'khóa' : 'mở khóa';
+        $status = $post->is_pinned ? 'khóa' : 'mở khóa';
         return redirect()->back()->with('success', "Đã {$status} bài viết thành công!");
     }
 
@@ -247,23 +239,9 @@ class GuildPostController extends Controller
 
         $user = Auth::user();
 
-        $existingLike = GuildPostLike::where('post_id', $post->id)
-            ->where('user_id', $user->id)
-            ->first();
+        $liked = $this->guildPostService->toggleLike($post, $user->id);
 
-        if ($existingLike) {
-            $existingLike->delete();
-            $message = 'Đã bỏ thích bài viết!';
-        } else {
-            GuildPostLike::create([
-                'post_id' => $post->id,
-                'user_id' => $user->id,
-            ]);
-            $message = 'Đã thích bài viết!';
-            
-            NotificationService::createPostLikeNotification($post->id, $user->id);
-        }
-
+        $message = $liked ? 'Đã thích bài viết!' : 'Đã bỏ thích bài viết!';
         return redirect()->back()->with('success', $message);
     }
 }

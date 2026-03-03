@@ -53,3 +53,6 @@ Thumbs.db
 
 # Agent
 .agent
+docs/
+ERRORS.md
+GEMINI.md

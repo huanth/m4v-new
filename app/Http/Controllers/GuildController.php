@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Guild;
-use App\Models\GuildMember;
+use App\Services\GuildService;
 
 class GuildController extends Controller
 {
-    public function __construct()
+    protected GuildService $guildService;
+
+    public function __construct(GuildService $guildService)
     {
         $this->middleware('auth')->only(['create', 'store']);
+        $this->guildService = $guildService;
     }
 
     /**
@@ -65,18 +68,7 @@ class GuildController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        $guild = Guild::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'leader_id' => $user->id,
-            'max_members' => 999999,
-        ]);
-
-        GuildMember::create([
-            'guild_id' => $guild->id,
-            'user_id' => $user->id,
-            'role' => Guild::ROLE_LEADER,
-        ]);
+        $guild = $this->guildService->createGuild($request->all(), $user->id);
 
         return redirect()->route('guilds.show', $guild->id)
             ->with('success', 'Tạo bang hội thành công!');
