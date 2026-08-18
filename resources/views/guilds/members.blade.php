@@ -132,7 +132,7 @@
                                                             @if($member->role === 'member')
                                                                 <form method="POST" action="{{ route('guilds.member.role', $guild->id) }}" class="block">
                                                                     @csrf
-                                                                    <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                                                    <input type="hidden" name="member_id" value="{{ $member->id }}">
                                                                     <input type="hidden" name="role" value="elder">
                                                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                                         Thăng làm Trưởng lão
@@ -142,7 +142,7 @@
                                                             @if($member->role === 'elder')
                                                                 <form method="POST" action="{{ route('guilds.member.role', $guild->id) }}" class="block">
                                                                     @csrf
-                                                                    <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                                                    <input type="hidden" name="member_id" value="{{ $member->id }}">
                                                                     <input type="hidden" name="role" value="vice_leader">
                                                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                                         Thăng làm Phó bang
@@ -152,7 +152,7 @@
                                                             @if($member->role === 'vice_leader')
                                                                 <form method="POST" action="{{ route('guilds.member.role', $guild->id) }}" class="block">
                                                                     @csrf
-                                                                    <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                                                    <input type="hidden" name="member_id" value="{{ $member->id }}">
                                                                     <input type="hidden" name="role" value="elder">
                                                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                                         Hạ xuống Trưởng lão
@@ -162,13 +162,23 @@
                                                             @if($member->role !== 'member')
                                                                 <form method="POST" action="{{ route('guilds.member.role', $guild->id) }}" class="block">
                                                                     @csrf
-                                                                    <input type="hidden" name="user_id" value="{{ $member->user_id }}">
+                                                                    <input type="hidden" name="member_id" value="{{ $member->id }}">
                                                                     <input type="hidden" name="role" value="member">
                                                                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                                         Hạ xuống Thành viên
                                                                     </button>
                                                                 </form>
                                                             @endif
+                                                            @can('ban', [$guild, $member])
+                                                                <form method="POST" action="{{ route('guilds.member.ban', $guild->id) }}" class="block border-t border-gray-100" onsubmit="return submitBanForm(event)">
+                                                                    @csrf
+                                                                    <input type="hidden" name="member_id" value="{{ $member->id }}">
+                                                                    <input type="hidden" name="reason" class="ban-reason-input">
+                                                                    <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                                        Ban khỏi bang hội
+                                                                    </button>
+                                                                </form>
+                                                            @endcan
                                                         </div>
                                                     </div>
                                                 </div>
@@ -207,5 +217,15 @@ document.addEventListener('click', function(event) {
         });
     }
 });
+
+function submitBanForm(event) {
+    const form = event.target;
+    const reason = prompt('Lý do ban thành viên này khỏi bang hội:');
+    if (reason === null) {
+        return false;
+    }
+    form.querySelector('.ban-reason-input').value = reason;
+    return confirm('Xác nhận ban thành viên này khỏi bang hội?');
+}
 </script>
 @endsection

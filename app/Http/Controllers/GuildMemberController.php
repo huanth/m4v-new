@@ -87,4 +87,59 @@ class GuildMemberController extends Controller
 
         return redirect()->back()->with('success', 'Cập nhật role thành công!');
     }
+
+    /**
+     * Ban a member from the guild
+     */
+    public function ban(Request $request, $id)
+    {
+        $guild = Guild::findOrFail($id);
+
+        $request->validate([
+            'member_id' => 'required|exists:guild_members,id',
+            'reason' => 'nullable|string|max:1000',
+        ]);
+
+        $member = GuildMember::where('id', $request->member_id)
+            ->where('guild_id', $guild->id)
+            ->firstOrFail();
+
+        Gate::authorize('ban', [$guild, $member]);
+
+        $this->guildMemberService->banMember($guild, $member->user_id, auth()->id(), $request->reason);
+
+        return redirect()->back()->with('success', 'Đã ban thành viên khỏi bang hội.');
+    }
+
+    /**
+     * Lift a guild ban
+     */
+    public function unban(Request $request, $id)
+    {
+        $guild = Guild::findOrFail($id);
+
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        Gate::authorize('unban', $guild);
+
+        $this->guildMemberService->unbanMember($guild, $request->user_id);
+
+        return redirect()->back()->with('success', 'Đã gỡ ban cho thành viên.');
+    }
+
+    /**
+     * Show the guild's banned members list
+     */
+    public function bannedList($id)
+    {
+        $guild = Guild::findOrFail($id);
+
+        Gate::authorize('unban', $guild);
+
+        $bans = $guild->guildBans()->with(['user', 'bannedBy'])->active()->orderBy('banned_at', 'desc')->get();
+
+        return view('guilds.banned', compact('guild', 'bans'));
+    }
 }

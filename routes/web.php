@@ -14,6 +14,7 @@ use App\Http\Controllers\GuildController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 
 // Home page
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
@@ -86,6 +87,9 @@ Route::middleware(['auth', 'check.ban'])->group(function () {
     Route::post('/{id}/join', [GuildMemberController::class, 'join'])->name('guilds.join')->where('id', '[0-9]+');
     Route::post('/{id}/leave', [GuildMemberController::class, 'leave'])->name('guilds.leave')->where('id', '[0-9]+');
     Route::post('/{id}/member/role', [GuildMemberController::class, 'updateRole'])->name('guilds.member.role')->where('id', '[0-9]+');
+    Route::post('/{id}/member/ban', [GuildMemberController::class, 'ban'])->name('guilds.member.ban')->where('id', '[0-9]+');
+    Route::post('/{id}/member/unban', [GuildMemberController::class, 'unban'])->name('guilds.member.unban')->where('id', '[0-9]+');
+    Route::get('/{id}/banned', [GuildMemberController::class, 'bannedList'])->name('guilds.banned')->where('id', '[0-9]+');
     
     // Categories
     Route::post('/{id}/category', [GuildCategoryController::class, 'store'])->name('guilds.category.create')->where('id', '[0-9]+');
@@ -139,4 +143,12 @@ Route::middleware(['auth', 'check.ban'])->group(function () {
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     Route::get('/notifications/latest', [NotificationController::class, 'getLatest'])->name('notifications.latest');
+});
+
+// Report Routes (Authenticated users only; Moderator/Admin/SuperAdmin manage the queue)
+Route::middleware(['auth', 'check.ban'])->group(function () {
+    Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+    Route::get('/admin/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::post('/admin/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve');
+    Route::post('/admin/reports/{report}/dismiss', [ReportController::class, 'dismiss'])->name('reports.dismiss');
 });

@@ -18,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\GuildCategory::class => \App\Policies\GuildCategoryPolicy::class,
         \App\Models\GuildPost::class => \App\Policies\GuildPostPolicy::class,
         \App\Models\GuildPostComment::class => \App\Policies\GuildPostCommentPolicy::class,
+        \App\Models\Report::class => \App\Policies\ReportPolicy::class,
     ];
 
     /**

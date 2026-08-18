@@ -144,6 +144,17 @@
                         </svg>
                         <span>{{ $post->views_count }}</span>
                     </div>
+
+                    <!-- Report Button -->
+                    @auth
+                        <button onclick="openReportModal('post', {{ $post->id }})"
+                                class="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-gray-100 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <span>Báo cáo</span>
+                        </button>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -332,14 +343,18 @@
 
                                                     <!-- Reply Button -->
                                                     @if(auth()->check())
-                                                        <button onclick="toggleReplyForm({{ $comment->id }})" 
+                                                        <button onclick="toggleReplyForm({{ $comment->id }})"
                                                                 class="px-2 py-1 rounded-md text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors">
                                                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
                                                             </svg>
                                                             Trả lời
                                                         </button>
-                                                        
+
+                                                        <button onclick="openReportModal('comment', {{ $comment->id }})"
+                                                                class="px-2 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                                            Báo cáo
+                                                        </button>
                                                     @endif
 
                                                     <!-- Edit/Delete Actions -->
@@ -508,7 +523,40 @@
     </div>
 </div>
 
+<!-- Report Modal -->
+<div id="reportModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Báo cáo nội dung</h3>
+        <form method="POST" action="{{ route('reports.store') }}">
+            @csrf
+            <input type="hidden" id="reportType" name="reportable_type" value="">
+            <input type="hidden" id="reportId" name="reportable_id" value="">
+            <textarea name="reason" rows="4" required maxlength="1000"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Mô tả lý do báo cáo..."></textarea>
+            <div class="flex space-x-2 mt-4">
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">
+                    Gửi báo cáo
+                </button>
+                <button type="button" onclick="closeReportModal()" class="bg-gray-500 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-600">
+                    Hủy
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function openReportModal(type, id) {
+    document.getElementById('reportType').value = type;
+    document.getElementById('reportId').value = id;
+    document.getElementById('reportModal').classList.remove('hidden');
+}
+
+function closeReportModal() {
+    document.getElementById('reportModal').classList.add('hidden');
+}
+
 function editComment(commentId, content) {
     const editor = tinymce.get('editCommentContent');
     if (editor) {

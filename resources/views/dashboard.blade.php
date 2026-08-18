@@ -94,10 +94,10 @@
                             <h3 class="font-medium text-yellow-900">Quản lý người dùng</h3>
                             <p class="text-sm text-yellow-700">Xem và quản lý tài khoản người dùng</p>
                         </a>
-                        <a href="#" class="bg-yellow-100 hover:bg-yellow-200 rounded-lg p-4 transition-colors">
-                            <h3 class="font-medium text-yellow-900">Quản lý bài viết</h3>
-                            <p class="text-sm text-yellow-700">Kiểm duyệt và quản lý nội dung</p>
-                        </a>
+                        <div class="bg-gray-100 rounded-lg p-4 opacity-60 cursor-not-allowed" title="Tính năng đang phát triển">
+                            <h3 class="font-medium text-gray-600">Quản lý bài viết</h3>
+                            <p class="text-sm text-gray-500">Kiểm duyệt và quản lý nội dung (sắp ra mắt)</p>
+                        </div>
                     </div>
                 </div>
                 @endif

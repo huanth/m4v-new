@@ -73,6 +73,14 @@ class Guild extends Model
     }
 
     /**
+     * Get all guild-scoped bans
+     */
+    public function guildBans(): HasMany
+    {
+        return $this->hasMany(GuildBan::class);
+    }
+
+    /**
      * Get current member count
      */
     public function getMemberCountAttribute()
@@ -132,6 +140,11 @@ class Guild extends Model
 
         // Check if guild is active
         if (!$this->is_active) {
+            return false;
+        }
+
+        // Check if user is banned from this guild
+        if (GuildBan::isUserBanned($this->id, $userId)) {
             return false;
         }
 

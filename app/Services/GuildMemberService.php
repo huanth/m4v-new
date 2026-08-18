@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Guild;
+use App\Models\GuildBan;
 use App\Models\GuildMember;
 
 class GuildMemberService
@@ -39,5 +40,31 @@ class GuildMemberService
     public function updateRole(GuildMember $member, string $role): bool
     {
         return $member->update(['role' => $role]);
+    }
+
+    /**
+     * Ban a member from the guild: removes their membership and records the ban
+     */
+    public function banMember(Guild $guild, int $targetUserId, int $bannedByUserId, ?string $reason = null): GuildBan
+    {
+        $guild->members()->where('user_id', $targetUserId)->delete();
+
+        return GuildBan::create([
+            'guild_id' => $guild->id,
+            'user_id' => $targetUserId,
+            'banned_by' => $bannedByUserId,
+            'reason' => $reason,
+        ]);
+    }
+
+    /**
+     * Lift a guild ban
+     */
+    public function unbanMember(Guild $guild, int $targetUserId): bool
+    {
+        return GuildBan::where('guild_id', $guild->id)
+            ->where('user_id', $targetUserId)
+            ->active()
+            ->update(['is_active' => false]) > 0;
     }
 }

@@ -25,7 +25,7 @@
 
             <!-- Danh sách thành viên bị ban ở bang hội -->
             @if(auth()->user()->isSuperAdmin() || auth()->user()->isAdmin() || $userMembership->canManageRoles())
-            <a href="#" 
+            <a href="{{ route('guilds.banned', $guild->id) }}"
                class="inline-flex items-center text-sm font-medium text-gray-700 focus:outline-none mr-2 mb-2">
                🔹Thành viên bị ban
             </a>

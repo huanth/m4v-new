@@ -55,4 +55,34 @@ class GuildMemberPolicy
         $userMembership = $guild->members()->where('user_id', $user->id)->first();
         return $userMembership && $userMembership->canManageRoles();
     }
+
+    /**
+     * Determine whether the user can ban a member from the guild.
+     */
+    public function ban(User $user, Guild $guild, GuildMember $targetMember): bool
+    {
+        if ($targetMember->isLeader()) {
+            return false;
+        }
+
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $userMembership = $guild->members()->where('user_id', $user->id)->first();
+        return $userMembership && $userMembership->canManageRoles();
+    }
+
+    /**
+     * Determine whether the user can unban a member / view the guild ban list.
+     */
+    public function unban(User $user, Guild $guild): bool
+    {
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return true;
+        }
+
+        $userMembership = $guild->members()->where('user_id', $user->id)->first();
+        return $userMembership && $userMembership->canManageRoles();
+    }
 }
